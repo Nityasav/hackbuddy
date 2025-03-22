@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,6 +14,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import UserProfile from "./pages/UserProfile";
 import AIAgent from "./pages/AIAgent";
+import ScheduleCall from "./pages/ScheduleCall";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,6 +42,7 @@ const App = () => (
               <Route path="/register" element={<Register />} />
               <Route path="/user/:userId" element={<UserProfile />} />
               <Route path="/ai-agent" element={<AIAgent />} />
+              <Route path="/schedule-call" element={<ScheduleCall />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

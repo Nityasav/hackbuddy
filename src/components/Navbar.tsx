@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -55,7 +54,7 @@ const Navbar = () => {
           className="text-xl font-bold tracking-tight flex items-center"
         >
           <img 
-            src="/lovable-uploads/c58de648-bd38-4a4d-9139-f4f2087d30de.png" 
+            src="./robot.png" 
             alt="HackBuddy Logo" 
             className="h-8 w-8 mr-2 neon-glow" 
           />
