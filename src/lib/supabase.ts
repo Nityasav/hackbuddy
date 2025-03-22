@@ -273,24 +273,50 @@ export const getScheduledCalls = async (userId: string) => {
 };
 
 export const createScheduledCall = async (
-  userId: string, 
+  userId: string | null, 
   username: string, 
   email: string, 
   phone: string
 ) => {
-  const { data, error } = await supabase
-    .from('schedule_calls')
-    .insert({
-      user_id: userId,
-      username,
-      email,
-      phone,
-      scheduled_for: new Date().toISOString(),
-      status: 'pending'
-    })
-    .select();
-  
-  return { data, error };
+  try {
+    const { data, error } = await supabase
+      .from('schedule_calls')
+      .insert({
+        user_id: userId, // This can now be null for anonymous users
+        username,
+        email,
+        phone,
+        scheduled_for: new Date().toISOString(),
+        status: 'pending'
+      })
+      .select();
+    
+    if (error) {
+      console.error('Supabase Error Details:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint
+      });
+      
+      // Create a more descriptive error message
+      const errorMessage = error.message || 
+        error.details || 
+        error.hint || 
+        'Failed to create scheduled call';
+      
+      throw new Error(`Supabase Error: ${errorMessage} (Code: ${error.code})`);
+    }
+    
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error creating scheduled call:', error);
+    // Ensure we always return an error with a message
+    return { 
+      data: null, 
+      error: error instanceof Error ? error : new Error('Failed to create scheduled call')
+    };
+  }
 };
 
 export const updateScheduledCallStatus = async (

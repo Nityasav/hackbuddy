@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { supabase, createScheduledCall } from "@/lib/supabase";
+import { initiateCall } from "@/lib/vapi";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -264,25 +265,25 @@ const ScheduleCall = () => {
     setLoading(true);
     
     try {
-      // Store the scheduling data in Supabase using the helper function
-      const { error } = await createScheduledCall(
-        user?.id || 'anonymous',
-        data.username,
-        data.email,
-        data.phone
-      );
-
-      if (error) {
-        throw error;
+      // Initiate the Vapi call directly
+      const { success, callId, error: callError } = await initiateCall(data.phone);
+      
+      if (!success) {
+        console.error('Vapi Call Error:', callError);
+        throw new Error(callError || 'Failed to initiate call. Please check your Vapi API key and try again.');
       }
 
-      toast.success("Your call has been scheduled!");
+      toast.success("Your call has been scheduled! We'll be calling you shortly.");
       
       // Redirect to dashboard or confirmation page
       navigate("/");
     } catch (error) {
       console.error("Error scheduling call:", error);
-      toast.error("Failed to schedule call. Please try again.");
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : "Failed to schedule call. Please try again.";
+      
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
