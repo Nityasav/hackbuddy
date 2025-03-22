@@ -59,6 +59,17 @@ export type AgentCall = {
   updated_profile_data?: Record<string, any>;
 };
 
+export type ScheduleCall = {
+  id: string;
+  created_at: string;
+  user_id: string;
+  username: string;
+  email: string;
+  phone: string;
+  scheduled_for: string;
+  status: 'pending' | 'completed' | 'cancelled';
+};
+
 // Create Supabase client
 export const supabase = createClient<{
   public: {
@@ -87,6 +98,11 @@ export const supabase = createClient<{
         Row: AgentCall;
         Insert: Omit<AgentCall, 'id' | 'created_at'>;
         Update: Partial<Omit<AgentCall, 'id' | 'created_at'>>;
+      };
+      schedule_calls: {
+        Row: ScheduleCall;
+        Insert: Omit<ScheduleCall, 'id' | 'created_at'>;
+        Update: Partial<Omit<ScheduleCall, 'id' | 'created_at'>>;
       };
     };
   };
@@ -239,6 +255,51 @@ export const updateAgentCallData = async (callId: string, updates: Partial<Omit<
   const { data, error } = await supabase
     .from('agent_calls')
     .update(updates)
+    .eq('id', callId)
+    .select();
+  
+  return { data, error };
+};
+
+// Schedule call helpers
+export const getScheduledCalls = async (userId: string) => {
+  const { data, error } = await supabase
+    .from('schedule_calls')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+  
+  return { data, error };
+};
+
+export const createScheduledCall = async (
+  userId: string, 
+  username: string, 
+  email: string, 
+  phone: string
+) => {
+  const { data, error } = await supabase
+    .from('schedule_calls')
+    .insert({
+      user_id: userId,
+      username,
+      email,
+      phone,
+      scheduled_for: new Date().toISOString(),
+      status: 'pending'
+    })
+    .select();
+  
+  return { data, error };
+};
+
+export const updateScheduledCallStatus = async (
+  callId: string, 
+  status: 'pending' | 'completed' | 'cancelled'
+) => {
+  const { data, error } = await supabase
+    .from('schedule_calls')
+    .update({ status })
     .eq('id', callId)
     .select();
   
