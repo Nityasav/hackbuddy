@@ -8,23 +8,71 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { CalendarCheck, Clock, Phone, Sparkles, User, Mail, Calendar, ArrowRight, X } from "lucide-react";
+import { CalendarCheck, Clock, Phone, Sparkles, User, Mail, Calendar, ArrowRight, X, CheckCircle } from "lucide-react";
 import { useUser } from "@/context/UserContext";
 import { cn } from "@/lib/utils";
 
-// Form schema
+// Canadian area codes
+const CANADIAN_AREA_CODES = [
+  '226', '249', '289', '343', '365', '416', '437', '438', 
+  '450', '519', '548', '579', '581', '587', '604', '613', 
+  '639', '647', '705', '709', '778', '780', '807', '819', 
+  '867', '873', '902', '905', '506', '204'
+];
+
+// Email regex pattern
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+// Common valid email domains for more realistic validation
+const COMMON_EMAIL_DOMAINS = [
+  // Popular email services
+  'gmail.com', 'outlook.com', 'hotmail.com', 'yahoo.com', 'icloud.com', 'protonmail.com',
+  'aol.com', 'zoho.com', 'mail.com', 'yandex.com', 'gmx.com', 'tutanota.com',
+  
+  // Canadian educational institutions
+  'utoronto.ca', 'ubc.ca', 'mcgill.ca', 'yorku.ca', 'ualberta.ca', 'uwaterloo.ca',
+  'queensu.ca', 'uottawa.ca', 'ryerson.ca', 'sfu.ca', 'concordia.ca', 'uwo.ca',
+  'dal.ca', 'ucalgary.ca', 'umontreal.ca', 'hec.ca',
+  
+  // Canadian corporate domains
+  'shopify.com', 'rbc.com', 'td.com', 'bmo.com', 'cibc.com', 'scotiabank.com',
+  'telus.com', 'rogers.com', 'bell.ca', 'deloitte.ca', 'kpmg.ca', 'pwc.com',
+  'blackberry.com', 'bombardier.com', 'cgi.com', 'manulife.com', 'sunlife.com',
+  
+  // Canadian government
+  'canada.ca', 'gc.ca', 'ontario.ca', 'quebec.ca', 'alberta.ca', 'bc.ca', 
+  'manitoba.ca', 'saskatchewan.ca', 'novascotia.ca', 'nb.ca', 'pe.ca', 'gov.yk.ca',
+  'ntassembly.ca', 'gov.nu.ca'
+];
+
+// Form schema with enhanced validation
 const formSchema = z.object({
   username: z.string().min(2, {
     message: "Username must be at least 2 characters."
   }).max(50),
-  email: z.string().email({
-    message: "Please enter a valid email address."
-  }),
-  phone: z.string().min(7, {
-    message: "Phone number must be at least 7 digits."
-  }).max(15, {
-    message: "Phone number is too long."
-  }),
+  email: z.string()
+    .email({ message: "Please enter a valid email address." })
+    .refine((email) => EMAIL_REGEX.test(email), {
+      message: "Invalid email format. Please use a valid email address."
+    }),
+  phone: z.string()
+    .min(10, { message: "Phone number must be at least 10 digits." })
+    .max(15, { message: "Phone number is too long." })
+    .refine((phone) => {
+      // Remove all non-digit characters for validation
+      const digitsOnly = phone.replace(/\D/g, '');
+      
+      // Check if it has 10 digits (standard North American number)
+      if (digitsOnly.length !== 10) {
+        return false;
+      }
+      
+      // Check if it starts with a valid Canadian area code
+      const areaCode = digitsOnly.substring(0, 3);
+      return CANADIAN_AREA_CODES.includes(areaCode);
+    }, {
+      message: "Please enter a valid Canadian phone number starting with a valid area code."
+    }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -32,6 +80,9 @@ type FormValues = z.infer<typeof formSchema>;
 const ScheduleCall = () => {
   const [loading, setLoading] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
+  const [isEmailValid, setIsEmailValid] = useState(false);
+  const [isPhoneValid, setIsPhoneValid] = useState(false);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const navigate = useNavigate();
   const { user } = useUser();
   
@@ -43,9 +94,173 @@ const ScheduleCall = () => {
       email: user?.email || "",
       phone: "",
     },
+    mode: "onChange"
   });
 
+  const formatPhoneNumber = (value: string) => {
+    // Remove all non-digit characters
+    const digitsOnly = value.replace(/\D/g, '');
+    
+    // Format: (XXX) XXX-XXXX
+    if (digitsOnly.length >= 10) {
+      const areaCode = digitsOnly.substring(0, 3);
+      const prefix = digitsOnly.substring(3, 6);
+      const lineNumber = digitsOnly.substring(6, 10);
+      return `(${areaCode}) ${prefix}-${lineNumber}`;
+    } else if (digitsOnly.length >= 6) {
+      const areaCode = digitsOnly.substring(0, 3);
+      const prefix = digitsOnly.substring(3, 6);
+      const lineNumber = digitsOnly.substring(6);
+      return `(${areaCode}) ${prefix}-${lineNumber}`;
+    } else if (digitsOnly.length >= 3) {
+      const areaCode = digitsOnly.substring(0, 3);
+      const prefix = digitsOnly.substring(3);
+      return `(${areaCode}) ${prefix}`;
+    } else {
+      return digitsOnly ? `(${digitsOnly}` : '';
+    }
+  };
+
+  // Validate email through API simulation and realistic checks
+  const validateEmail = async (email: string) => {
+    // Initial format validation
+    if (!EMAIL_REGEX.test(email)) {
+      setIsEmailValid(false);
+      return false;
+    }
+
+    setIsCheckingEmail(true);
+    
+    try {
+      // Extract parts of the email
+      const [localPart, domain] = email.split('@');
+      
+      // Check local part (username) format and constraints
+      // Most real email services have restrictions on username length and format
+      if (localPart.length < 3 || localPart.length > 64) {
+        setIsEmailValid(false);
+        return false;
+      }
+      
+      // Check for consecutive special characters which are usually not allowed
+      if (/[._%+-]{2,}/.test(localPart)) {
+        setIsEmailValid(false);
+        return false;
+      }
+      
+      // Cannot start or end with certain special characters
+      if (/^[._%+-]|[._%+-]$/.test(localPart)) {
+        setIsEmailValid(false);
+        return false;
+      }
+      
+      // Domain validation
+      const domainParts = domain.split('.');
+      const tld = domainParts[domainParts.length - 1]; // Top-level domain
+      
+      // Check domain constraints
+      if (domainParts.length < 2 || tld.length < 2) {
+        setIsEmailValid(false);
+        return false;
+      }
+      
+      /*
+       * PRODUCTION EMAIL VALIDATION IMPLEMENTATION:
+       * 
+       * In a real production environment, the proper approach would be:
+       * 
+       * 1. Frontend validation for basic format (already implemented)
+       * 
+       * 2. Backend validation using specialized libraries or services:
+       *    - Create a backend API endpoint that takes an email to validate
+       *    - Use libraries like "email-deep-validator" or "email-validator" with DNS checks
+       *    - Implement DNS MX record lookup to verify domain can receive email
+       *    - Verify SMTP connection to the mail server without sending actual messages
+       *    - Check disposable email database to filter temporary emails
+       * 
+       * 3. Use third-party email validation services (for critical applications):
+       *    - Integration with services like Abstract API, Mailgun Email Validation, or Sendgrid
+       *    - These services maintain databases of known valid/invalid email patterns
+       *    - They perform real-time DNS, MX, SMTP, and mailbox verification
+       *    - They can detect disposable/throwaway email services
+       * 
+       * 4. Actual implementation:
+       *    const response = await fetch('/api/validate-email', {
+       *      method: 'POST',
+       *      headers: { 'Content-Type': 'application/json' },
+       *      body: JSON.stringify({ email })
+       *    });
+       *    const result = await response.json();
+       *    return result.isValid;
+       */
+      
+      // Simulate API call for email validation service check
+      // This would be replaced with a real API call to a service like Abstract API, EmailVerifier, etc.
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // For demonstration purposes, only reject obviously fake patterns
+      if (/asdf|qwerty|test|fake|example|invalid|123456|abcdef/.test(localPart)) {
+        setIsEmailValid(false);
+        return false;
+      }
+      
+      // Check for gibberish patterns (long strings of consonants or random characters)
+      if (/[bcdfghjklmnpqrstvwxyz]{6,}/.test(localPart)) {
+        setIsEmailValid(false);
+        return false;
+      }
+      
+      // In this demo, accept all well-formed emails that don't have obviously fake patterns
+      // For nitya.ca and other custom domains, this approach will accept them as valid
+      setIsEmailValid(true);
+      return true;
+      
+    } catch (error) {
+      console.error("Error validating email:", error);
+      setIsEmailValid(false);
+      return false;
+    } finally {
+      setIsCheckingEmail(false);
+    }
+  };
+
+  // When email field changes
+  const handleEmailChange = async (email: string) => {
+    form.setValue('email', email);
+    if (email && EMAIL_REGEX.test(email)) {
+      await validateEmail(email);
+    } else {
+      setIsEmailValid(false);
+    }
+  };
+
+  // When phone field changes
+  const handlePhoneChange = (phone: string) => {
+    const formatted = formatPhoneNumber(phone);
+    form.setValue('phone', formatted);
+    
+    // Validate Canadian area code
+    const digitsOnly = phone.replace(/\D/g, '');
+    if (digitsOnly.length >= 3) {
+      const areaCode = digitsOnly.substring(0, 3);
+      setIsPhoneValid(CANADIAN_AREA_CODES.includes(areaCode) && digitsOnly.length === 10);
+    } else {
+      setIsPhoneValid(false);
+    }
+  };
+
   const onSubmit = async (data: FormValues) => {
+    // Final validation check before submission
+    if (!isEmailValid) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    
+    if (!isPhoneValid) {
+      toast.error("Please enter a valid Canadian phone number.");
+      return;
+    }
+    
     setLoading(true);
     
     try {
@@ -205,12 +420,50 @@ const ScheduleCall = () => {
                               <Input 
                                 placeholder="your.email@example.com" 
                                 type="email" 
-                                {...field} 
-                                className="pl-10 bg-black/30 border-white/20 focus:border-primary transition-all hover:bg-black/40" 
+                                {...field}
+                                onChange={(e) => handleEmailChange(e.target.value)}
+                                className={cn(
+                                  "pl-10 bg-black/30 border-white/20 focus:border-primary transition-all hover:bg-black/40",
+                                  field.value && (isEmailValid ? "border-green-500" : "border-red-500")
+                                )}
                               />
+                              {field.value && (
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                                  {isCheckingEmail ? (
+                                    <div className="h-4 w-4 border-2 border-t-transparent border-primary rounded-full animate-spin" />
+                                  ) : isEmailValid ? (
+                                    <CheckCircle className="h-4 w-4 text-green-500" />
+                                  ) : (
+                                    <X className="h-4 w-4 text-red-500" />
+                                  )}
+                                </div>
+                              )}
                             </div>
                           </FormControl>
                           <FormMessage />
+                          {field.value && !isEmailValid && !isCheckingEmail && (
+                            <p className="text-sm text-red-500 mt-1">
+                              {!EMAIL_REGEX.test(field.value) ? 
+                                "Please enter a valid email format (e.g., name@domain.com)" :
+                                field.value.split('@')[0].length < 3 ?
+                                "Email username must be at least 3 characters" :
+                                field.value.split('@')[0].length > 64 ?
+                                "Email username cannot exceed 64 characters" :
+                                /[._%+-]{2,}/.test(field.value.split('@')[0]) ?
+                                "Email cannot contain consecutive special characters" :
+                                /^[._%+-]|[._%+-]$/.test(field.value.split('@')[0]) ?
+                                "Email cannot start or end with special characters" :
+                                /[bcdfghjklmnpqrstvwxyz]{6,}/.test(field.value.split('@')[0]) ?
+                                "This email appears to contain random characters" :
+                                /asdf|qwerty|test|fake|example|invalid|123456|abcdef/.test(field.value.split('@')[0]) ?
+                                "This email appears to be for testing purposes" :
+                                "Please enter a valid email address"
+                              }
+                            </p>
+                          )}
+                          <p className="text-xs text-foreground/60 mt-1">
+                            Please provide your actual email address for communication purposes.
+                          </p>
                         </FormItem>
                       )}
                     />
@@ -229,24 +482,47 @@ const ScheduleCall = () => {
                                 <Phone className="h-4 w-4 text-primary/70" />
                               </div>
                               <Input 
-                                placeholder="(555) 123-4567" 
-                                type="tel" 
-                                {...field} 
-                                className="pl-10 bg-black/30 border-white/20 focus:border-primary transition-all hover:bg-black/40" 
+                                placeholder="(XXX) XXX-XXXX" 
+                                type="tel"
+                                {...field}
+                                onChange={(e) => handlePhoneChange(e.target.value)}
+                                className={cn(
+                                  "pl-10 bg-black/30 border-white/20 focus:border-primary transition-all hover:bg-black/40",
+                                  field.value && (isPhoneValid ? "border-green-500" : "border-red-500")
+                                )}
                               />
+                              {field.value && (
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                                  {isPhoneValid ? (
+                                    <CheckCircle className="h-4 w-4 text-green-500" />
+                                  ) : (
+                                    <X className="h-4 w-4 text-red-500" />
+                                  )}
+                                </div>
+                              )}
                             </div>
                           </FormControl>
                           <FormMessage />
+                          {field.value && !isPhoneValid && field.value.replace(/\D/g, '').length >= 3 && (
+                            <p className="text-sm text-red-500 mt-1">
+                              Please enter a valid Canadian phone number starting with a valid area code.
+                            </p>
+                          )}
+                          <p className="text-xs text-foreground/60 mt-1">
+                            Must be a valid Canadian phone number (e.g., (647) 555-1234)
+                          </p>
                         </FormItem>
                       )}
                     />
                     
                     <button 
                       type="submit" 
-                      disabled={loading}
+                      disabled={loading || !isEmailValid || !isPhoneValid}
                       className={cn(
-                        "w-full py-3 rounded-full bg-primary relative overflow-hidden group transition-all duration-300 hover-lift-micro animate-fade-up",
-                        loading ? "opacity-80" : ""
+                        "w-full py-3 rounded-full relative overflow-hidden group transition-all duration-300 hover-lift-micro animate-fade-up",
+                        loading || !isEmailValid || !isPhoneValid ? 
+                          "bg-primary/40 cursor-not-allowed" : 
+                          "bg-primary hover:bg-primary/90"
                       )}
                       style={{ animationDelay: '400ms' }}
                     >
@@ -254,7 +530,9 @@ const ScheduleCall = () => {
                         {loading ? "Scheduling..." : "Schedule Call"}
                         {!loading && <ArrowRight className="ml-2 h-5 w-5 transform transition-transform group-hover:translate-x-1" />}
                       </span>
-                      <span className="absolute inset-0 bg-gradient-to-r from-primary to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                      {(isEmailValid && isPhoneValid) && (
+                        <span className="absolute inset-0 bg-gradient-to-r from-primary to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                      )}
                     </button>
                     
                     <p className="text-center text-sm text-foreground/60 animate-fade-up" style={{ animationDelay: '500ms' }}>
