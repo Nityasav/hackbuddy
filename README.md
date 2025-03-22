@@ -3,6 +3,38 @@
 
 HackBuddy is an innovative platform designed to solve one of the biggest challenges in hackathons: finding the perfect team. Our AI-powered system matches participants based on complementary skills, experience levels, and project interests.
 
+# Project Inspiration
+
+We’ve all been there: staring at a sea of Discord channels or crowded Slack threads, desperately trying to find a team... hours before a hackathon starts. Our team literally experienced this (shoutout to our panic-fueled last-minute group formation), and we thought: there’s got to be a better way.
+
+Hackathons are meant to spark creativity and collaboration — not stress about finding people to collaborate with. But for introverts, first-timers, or folks without a big network, finding teammates can be awkward, stressful, and, honestly, kind of random. So we built HackBuddy, an AI-powered teammate-matching agent that listens, understands, and connects hackers with the right teammates — all with just a call. In a world where generative AI can write code, why can’t it help you find the right people to write it with?
+
+# Technology Stack
+
+Javascript, Typescript, HTML/CSS, Node.js, Vapi, OpenAI, v0, Lovable, Google Cloud, Json, Supabase, GitHub, Vite.js, Cursor, Tailwind CSS
+
+# Product Summary
+
+HackBuddy is your personal AI wingman for hackathons. Instead of stressing out over awkward intro messages or last-minute team scrambles, hackers can just hop on a call with HackBuddy, tell it their interests, skills, and ideas, and get matched with other hackers looking for teammates.
+
+Key Features:
+  AI Voice Interaction: Call HackBuddy and have a natural conversation about your skills and project ideas. No forms, no boring surveys — just chat.
+
+  Smart Matching: HackBuddy uses AI to match you with other hackers based on skills, interests, and availability.
+
+  Profile Creation: A simple, slick web app where users can set up profiles, list skills, and manage their matches.
+
+  Hackathon Organizer Integration: Hackathon organizers can upload participant data to our platform, making team formation faster and more efficient for everyone.
+
+  Real-Time Updates: New hackers join? New opportunities pop up! HackBuddy keeps suggesting fresh matches.
+
+# What makes it innovative?
+
+We took generative AI out of the chatbox and into your phone, giving it a human-like voice and personality. It’s not just a chatbot — it feels like a super social friend who knows everyone and wants to help you out. By combining conversational AI with real-time matchmaking, we’re solving one of the most frustrating parts of hackathons for shy, new, or less-connected participants. No awkward cold messages. No panic. Just smooth team formation.
+
+
+
+
 ## Supabase Setup Instructions
 
 ### Step 1: Create a Supabase Project
