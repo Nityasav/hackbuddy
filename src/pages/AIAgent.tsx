@@ -16,9 +16,9 @@ const AIAgent = () => {
         <div className="container px-4 mx-auto">
           <div className="mb-8 animate-fade-up">
             <h1 className="text-3xl md:text-4xl font-bold mb-3">
-              <span className="text-[hsl(var(--blue-accent))] neon-text-blue">AI</span> <span className="text-primary neon-text">Agent</span>
+              <span className="text-white neon-text-blue">AI</span> <span className="text-primary neon-text">Agent</span>
             </h1>
-            <p className="text-[hsl(var(--blue-accent))]/90 text-lg">
+            <p className="text-white/90 text-lg">
               Connect with our AI agent to help find your perfect hackathon team match
             </p>
           </div>
@@ -28,23 +28,23 @@ const AIAgent = () => {
             <div className="flex flex-col md:flex-row items-center gap-6">
               <div className="w-40 h-40 flex-shrink-0 rounded-full overflow-hidden border-4 border-primary/30 flex items-center justify-center bg-secondary/30 animate-pulse">
                 <img 
-                  src="./robot.png" 
+                  src="./logo.png" 
                   alt="AI Agent" 
                   className="h-32 w-32 object-contain neon-glow hover-lift" 
                 />
               </div>
               
               <div className="flex-1">
-                <h2 className="text-2xl font-bold mb-2 text-[hsl(var(--blue-accent))] neon-text-blue">Meet Your Match Agent</h2>
+                <h2 className="text-2xl font-bold mb-2 text-white neon-text-blue">Meet Your Match Agent</h2>
                 <p className="text-foreground/70 mb-4">
                   Our AI-powered agent will interview you to understand your skills, preferences, and project goals.
                   Based on this information, we'll connect you with the perfect teammates for your next hackathon.
                 </p>
                 
                 <div className="flex flex-wrap gap-3 mb-6">
-                  <span className="bg-[hsl(var(--blue-accent))]/10 text-[hsl(var(--blue-accent))] text-sm px-3 py-1 rounded-full animate-fade-right animate-delay-200">Skills Assessment</span>
+                  <span className="bg-white/10 text-white text-sm px-3 py-1 rounded-full animate-fade-right animate-delay-200">Skills Assessment</span>
                   <span className="bg-primary/10 text-primary text-sm px-3 py-1 rounded-full animate-fade-right animate-delay-300">Project Matching</span>
-                  <span className="bg-[hsl(var(--blue-accent))]/10 text-[hsl(var(--blue-accent))] text-sm px-3 py-1 rounded-full animate-fade-right animate-delay-400">Team Formation</span>
+                  <span className="bg-white/10 text-white text-sm px-3 py-1 rounded-full animate-fade-right animate-delay-400">Team Formation</span>
                   <span className="bg-primary/10 text-primary text-sm px-3 py-1 rounded-full animate-fade-right animate-delay-500">Hackathon Networking</span>
                 </div>
                 
@@ -75,7 +75,7 @@ const AIAgent = () => {
 
           {/* How It Works */}
           <div className="mb-12 animate-fade-up animate-delay-300">
-            <h2 className="text-2xl font-bold mb-6 text-[hsl(var(--blue-accent))] neon-text-blue">How It Works</h2>
+            <h2 className="text-2xl font-bold mb-6 text-white neon-text-blue">How It Works</h2>
             
             <div className="grid md:grid-cols-3 gap-6">
               <div className="glass-card p-6 rounded-xl hover-lift">
@@ -87,10 +87,10 @@ const AIAgent = () => {
               </div>
               
               <div className="glass-card p-6 rounded-xl hover-lift">
-                <div className="h-12 w-12 rounded-full bg-[hsl(var(--blue-accent))]/10 flex items-center justify-center mb-4">
-                  <User className="h-6 w-6 text-[hsl(var(--blue-accent))]" />
+                <div className="h-12 w-12 rounded-full bg-white/10 flex items-center justify-center mb-4">
+                  <User className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-[hsl(var(--blue-accent))]">2. Profile Creation</h3>
+                <h3 className="text-xl font-semibold mb-3 text-white">2. Profile Creation</h3>
                 <p className="text-foreground/70">Based on your interview, we create a comprehensive profile that highlights your strengths and team preferences.</p>
               </div>
               
@@ -106,21 +106,21 @@ const AIAgent = () => {
 
           {/* Agent Prompt Section */}
           {showPrompt && (
-            <div className="glass-card rounded-xl p-6 mb-10 border border-[hsl(var(--blue-accent))]/40 animate-fade-up">
-              <h2 className="text-2xl font-bold mb-4 text-[hsl(var(--blue-accent))] neon-text-blue">Agent Prompt</h2>
-              <div className="bg-black/50 p-6 rounded-lg border border-[hsl(var(--blue-accent))]/20">
+            <div className="glass-card rounded-xl p-6 mb-10 border border-white/40 animate-fade-up">
+              <h2 className="text-2xl font-bold mb-4 text-white neon-text-blue">Agent Prompt</h2>
+              <div className="bg-black/50 p-6 rounded-lg border border-white/20">
                 <h3 className="text-xl font-semibold mb-4 text-primary">HackBuddy AI Agent: Hackathon Team Matching System</h3>
                 
-                <div className="text-[hsl(var(--blue-accent))]/90 leading-relaxed">
-                  <p className="mb-4"><strong className="text-[hsl(var(--blue-accent))]">Project Overview:</strong> HackBuddy is an AI-powered matching platform designed to solve one of the most significant challenges in hackathons: finding the ideal team. This innovative solution uses advanced AI to connect participants based on complementary skills, experience levels, and project interests.</p>
+                <div className="text-white/90 leading-relaxed">
+                  <p className="mb-4"><strong className="text-white">Project Overview:</strong> HackBuddy is an AI-powered matching platform designed to solve one of the most significant challenges in hackathons: finding the ideal team. This innovative solution uses advanced AI to connect participants based on complementary skills, experience levels, and project interests.</p>
                   
-                  <p className="mb-4"><strong className="text-[hsl(var(--blue-accent))]">Target Competition:</strong> GenAI Genesis Hackathon in the "Beginner AI" and "Best AI-Powered Tool for Hackathon" categories, focusing on human empowerment through technology.</p>
+                  <p className="mb-4"><strong className="text-white">Target Competition:</strong> GenAI Genesis Hackathon in the "Beginner AI" and "Best AI-Powered Tool for Hackathon" categories, focusing on human empowerment through technology.</p>
                   
-                  <p className="mb-4"><strong className="text-[hsl(var(--blue-accent))]">Core Problem:</strong> Many hackathon participants struggle to find teammates whose skills complement their own, leading to suboptimal team formation and project outcomes. This issue is especially challenging for first-time hackers.</p>
+                  <p className="mb-4"><strong className="text-white">Core Problem:</strong> Many hackathon participants struggle to find teammates whose skills complement their own, leading to suboptimal team formation and project outcomes. This issue is especially challenging for first-time hackers.</p>
                   
-                  <p className="mb-4"><strong className="text-[hsl(var(--blue-accent))]">Solution:</strong> HackBuddy employs a conversational AI agent that conducts personalized interviews with participants to gather detailed information about their technical skills, previous projects, interests, and team preferences. This data is then used to create optimal team matches.</p>
+                  <p className="mb-4"><strong className="text-white">Solution:</strong> HackBuddy employs a conversational AI agent that conducts personalized interviews with participants to gather detailed information about their technical skills, previous projects, interests, and team preferences. This data is then used to create optimal team matches.</p>
                   
-                  <p className="mb-4"><strong className="text-[hsl(var(--blue-accent))]">Key Features:</strong></p>
+                  <p className="mb-4"><strong className="text-white">Key Features:</strong></p>
                   <ul className="list-disc pl-6 mb-4 space-y-2">
                     <li>AI-powered interview system that learns about participants through natural conversation</li>
                     <li>Skill-based matching algorithm that creates balanced, complementary teams</li>
@@ -128,9 +128,9 @@ const AIAgent = () => {
                     <li>B2C functionality allowing individuals to find ideal teammates across various hackathon events</li>
                   </ul>
                   
-                  <p className="mb-4"><strong className="text-[hsl(var(--blue-accent))]">Technical Implementation:</strong> The platform integrates with the Vapi API for voice-based AI interaction, with a database system that securely stores participant profiles and facilitates optimal matching.</p>
+                  <p className="mb-4"><strong className="text-white">Technical Implementation:</strong> The platform integrates with the Vapi API for voice-based AI interaction, with a database system that securely stores participant profiles and facilitates optimal matching.</p>
                   
-                  <p className="mb-4"><strong className="text-[hsl(var(--blue-accent))]">Market Validation:</strong> Similar models have proven successful in professional networking contexts (e.g., Boardy for LinkedIn), demonstrating the viability and demand for AI-powered connection services.</p>
+                  <p className="mb-4"><strong className="text-white">Market Validation:</strong> Similar models have proven successful in professional networking contexts (e.g., Boardy for LinkedIn), demonstrating the viability and demand for AI-powered connection services.</p>
                 </div>
               </div>
             </div>

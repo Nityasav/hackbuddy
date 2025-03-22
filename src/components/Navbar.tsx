@@ -54,12 +54,12 @@ const Navbar = () => {
           className="text-xl font-bold tracking-tight flex items-center"
         >
           <img 
-            src="./robot.png" 
+            src="./logo.png" 
             alt="HackBuddy Logo" 
             className="h-8 w-8 mr-2 neon-glow" 
           />
           <span className="text-primary neon-text">Hack</span>
-          <span className="text-[hsl(var(--blue-accent))] neon-text-blue">Buddy</span>
+          <span className="text-white neon-text-blue">Buddy</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -73,8 +73,8 @@ const Navbar = () => {
                 location.pathname === item.href
                   ? index % 2 === 0 
                     ? "text-primary neon-text" 
-                    : "text-[hsl(var(--blue-accent))] neon-text-blue"
-                  : "text-[hsl(var(--blue-accent))]/90 hover:text-[hsl(var(--blue-accent))] hover:bg-secondary/50"
+                    : "text-white neon-text-blue"
+                  : "text-white/90 hover:text-white hover:bg-secondary/50"
               )}
             >
               {item.name}
@@ -87,7 +87,7 @@ const Navbar = () => {
           {isAuthenticated ? (
             <>
               <Link to="/profile">
-                <Button variant="ghost" size="sm" className="flex items-center text-[hsl(var(--blue-accent))]">
+                <Button variant="ghost" size="sm" className="flex items-center text-white">
                   <User className="h-4 w-4 mr-1" />
                   Profile
                 </Button>
@@ -95,7 +95,7 @@ const Navbar = () => {
               <Button 
                 size="sm" 
                 variant="outline"
-                className="flex items-center neon-box-blue text-[hsl(var(--blue-accent))]"
+                className="flex items-center neon-box-blue text-white"
                 onClick={handleLogout}
               >
                 <LogOut className="h-4 w-4 mr-1" />
@@ -111,7 +111,7 @@ const Navbar = () => {
                 </Button>
               </Link>
               <Link to="/register">
-                <Button size="sm" variant="outline" className="flex items-center neon-box-blue text-[hsl(var(--blue-accent))]">
+                <Button size="sm" variant="outline" className="flex items-center neon-box-blue text-white">
                   <User className="h-4 w-4 mr-1" />
                   Register
                 </Button>
@@ -126,9 +126,9 @@ const Navbar = () => {
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           {isMobileMenuOpen ? (
-            <X className="h-6 w-6 text-[hsl(var(--blue-accent))]" />
+            <X className="h-6 w-6 text-white" />
           ) : (
-            <Menu className="h-6 w-6 text-[hsl(var(--blue-accent))]" />
+            <Menu className="h-6 w-6 text-white" />
           )}
         </button>
       </div>
@@ -150,8 +150,8 @@ const Navbar = () => {
                 location.pathname === item.href
                   ? index % 2 === 0 
                     ? "text-primary neon-text" 
-                    : "text-[hsl(var(--blue-accent))] neon-text-blue"
-                  : "text-[hsl(var(--blue-accent))]/90 hover:text-[hsl(var(--blue-accent))] hover:bg-secondary/50"
+                    : "text-white neon-text-blue"
+                  : "text-white/90 hover:text-white hover:bg-secondary/50"
               )}
             >
               {item.name}
@@ -167,7 +167,7 @@ const Navbar = () => {
                 <Button 
                   size="sm" 
                   variant="outline"
-                  className="w-full flex items-center justify-center neon-box-blue text-[hsl(var(--blue-accent))]"
+                  className="w-full flex items-center justify-center neon-box-blue text-white"
                 >
                   <LogOut className="h-4 w-4 mr-1" />
                   Sign Out
@@ -186,7 +186,7 @@ const Navbar = () => {
                 <Button 
                   size="sm" 
                   variant="outline"
-                  className="w-full flex items-center justify-center neon-box-blue text-[hsl(var(--blue-accent))]"
+                  className="w-full flex items-center justify-center neon-box-blue text-white"
                 >
                   <User className="h-4 w-4 mr-1" />
                   Register

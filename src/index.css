@@ -26,7 +26,7 @@
     --input: 230 36% 16%;
     --ring: 327 73% 65%;
     --radius: 0.75rem;
-    --blue-accent: 210 100% 70%;
+    --blue-accent: 0 0% 100%;
   }
 }
 
@@ -89,9 +89,9 @@
   }
 
   .neon-text-blue {
-    @apply text-[hsl(var(--blue-accent))];
-    text-shadow: 0 0 5px hsl(var(--blue-accent)), 
-                 0 0 20px hsl(var(--blue-accent));
+    @apply text-white;
+    text-shadow: 0 0 5px white, 
+                 0 0 20px white;
   }
 
   .neon-box {
@@ -101,9 +101,9 @@
   }
 
   .neon-box-blue {
-    @apply border border-[hsl(var(--blue-accent))]/60;
-    box-shadow: 0 0 5px hsl(var(--blue-accent)),
-                inset 0 0 5px hsl(var(--blue-accent));
+    @apply border border-white/60;
+    box-shadow: 0 0 5px white,
+                inset 0 0 5px white;
   }
 
   .neon-glow {
@@ -111,7 +111,7 @@
   }
 
   .neon-glow-blue {
-    filter: drop-shadow(0 0 8px hsl(var(--blue-accent)));
+    filter: drop-shadow(0 0 8px white);
   }
 
   /* Gradient backgrounds */
@@ -140,8 +140,8 @@
 }
 
 @keyframes pulse-glow-blue {
-  0%, 100% { filter: drop-shadow(0 0 5px hsl(var(--blue-accent))); }
-  50% { filter: drop-shadow(0 0 15px hsl(var(--blue-accent))); }
+  0%, 100% { filter: drop-shadow(0 0 5px white); }
+  50% { filter: drop-shadow(0 0 15px white); }
 }
 
 @keyframes fade-up {
@@ -285,7 +285,7 @@
 }
 
 .hover-glow-blue:hover {
-  filter: drop-shadow(0 0 12px hsl(var(--blue-accent)));
+  filter: drop-shadow(0 0 12px white);
 }
 
 /* Advanced blur effects for cards */
@@ -319,7 +319,7 @@
 }
 
 .card-hover-blue:hover {
-  @apply border-[hsl(var(--blue-accent))]/30 shadow-lg transform -translate-y-1;
+  @apply border-white/30 shadow-lg transform -translate-y-1;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 
-              0 0 10px 2px hsl(var(--blue-accent));
+              0 0 10px 2px white;
 }
