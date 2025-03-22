@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Users, UserPlus, UserCheck, UserX, Mail, RefreshCw, User } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { Users, UserPlus, UserCheck, UserX, Mail, RefreshCw, User, ExternalLink } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Button from "@/components/Button";
 import { useUser } from "@/context/UserContext";
@@ -24,6 +24,36 @@ type Connection = {
   };
 };
 
+// Mock connections data for development purposes
+const mockConnections: Connection[] = [
+  {
+    id: "conn1",
+    created_at: new Date().toISOString(),
+    requester_id: "user1",
+    recipient_id: "user2",
+    status: "pending",
+    profile: {
+      name: "Jordan Smith",
+      avatar_url: "https://randomuser.me/api/portraits/men/32.jpg",
+      skills: ["UI Design", "Figma", "Prototyping"],
+      email: "jordan@example.com"
+    }
+  },
+  {
+    id: "conn2",
+    created_at: new Date(Date.now() - 86400000).toISOString(),
+    requester_id: "user3",
+    recipient_id: "user1",
+    status: "accepted",
+    profile: {
+      name: "Taylor Wong",
+      avatar_url: "https://randomuser.me/api/portraits/women/62.jpg",
+      skills: ["Python", "Machine Learning", "Data Visualization"],
+      email: "taylor@example.com"
+    }
+  }
+];
+
 const Connections = () => {
   const { user, isAuthenticated } = useUser();
   const navigate = useNavigate();
@@ -31,6 +61,7 @@ const Connections = () => {
   const [connections, setConnections] = useState<Connection[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'accepted'>('all');
+  const [usesMockData, setUsesMockData] = useState(false);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -44,47 +75,104 @@ const Connections = () => {
     if (!user?.id) return;
     
     setLoading(true);
+    console.log("Starting to fetch connections for user:", user.id);
     
     try {
-      // Get connections where user is either requester or recipient
-      const { data, error } = await supabase
+      // Check if tables exist by making a small query
+      const { error: tableCheckError } = await supabase
         .from('connections')
-        .select(`
-          *,
-          requester:profiles!connections_requester_id_fkey(name, avatar_url, skills, contact_email),
-          recipient:profiles!connections_recipient_id_fkey(name, avatar_url, skills, contact_email)
-        `)
+        .select('id')
+        .limit(1);
+      
+      // If there's an error, tables might not be set up
+      if (tableCheckError) {
+        console.log("Error checking tables, using mock data:", tableCheckError);
+        setConnections(mockConnections);
+        setUsesMockData(true);
+        return;
+      }
+      
+      // First get all connections for the user
+      const { data: connectionsData, error: connectionsError } = await supabase
+        .from('connections')
+        .select('*')
         .or(`requester_id.eq.${user.id},recipient_id.eq.${user.id}`);
       
-      if (error) throw error;
-
-      // Process the connections
-      const processedConnections = data?.map(conn => {
-        // Determine if the current user is the requester
-        const isRequester = conn.requester_id === user.id;
+      console.log("Connections query result:", { connectionsData, connectionsError });
+      
+      if (connectionsError) {
+        console.log("Error fetching connections, using mock data");
+        setConnections(mockConnections);
+        setUsesMockData(true);
+        return;
+      }
+      
+      if (!connectionsData || connectionsData.length === 0) {
+        console.log("No connections found");
+        setConnections([]);
+        return;
+      }
+      
+      // Extract all user IDs we need to get profiles for
+      const userIds = connectionsData.map(conn => 
+        conn.requester_id === user.id ? conn.recipient_id : conn.requester_id
+      );
+      
+      console.log("User IDs to fetch profiles for:", userIds);
+      
+      // Fetch all relevant profiles in a single query
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('*')
+        .in('user_id', userIds);
+      
+      console.log("Profiles query result:", { profilesData, profilesError });
+      
+      if (profilesError) {
+        console.log("Error fetching profiles, using mock data");
+        setConnections(mockConnections);
+        setUsesMockData(true);
+        return;
+      }
+      
+      // Map connections with profile data
+      const processedConnections = connectionsData.map(conn => {
+        const otherUserId = conn.requester_id === user.id ? conn.recipient_id : conn.requester_id;
+        // Try finding by either user_id or id
+        const profileData = profilesData?.find(p => 
+          p.user_id === otherUserId || p.id === otherUserId
+        ) || null;
         
-        // Set the profile to be the other user's profile
-        const profile = isRequester ? conn.recipient : conn.requester;
+        console.log(`Processing connection ${conn.id} with other user ${otherUserId}`, { profileData });
         
         const connection: Connection = {
           ...conn,
-          profile: {
-            name: profile?.name || "Unknown User",
-            avatar_url: profile?.avatar_url || "",
-            skills: profile?.skills || [],
-            email: profile?.contact_email || ""
+          profile: profileData ? {
+            name: profileData.name || "Unknown User",
+            avatar_url: profileData.avatar_url || "",
+            skills: profileData.skills || [],
+            email: profileData.contact_email || ""
+          } : {
+            name: "Unknown User",
+            avatar_url: "",
+            skills: [],
+            email: ""
           }
         };
         
         return connection;
-      }) || [];
+      });
       
+      console.log("Processed connections:", processedConnections);
       setConnections(processedConnections);
+      setUsesMockData(false);
     } catch (error) {
       console.error("Error fetching connections:", error);
+      setConnections(mockConnections);
+      setUsesMockData(true);
       toast({
         title: "Failed to load connections",
-        description: "Please try again later",
+        description: "Using mock data for development",
         variant: "destructive",
       });
     } finally {
@@ -167,6 +255,19 @@ const Connections = () => {
         description: "Please try again later",
         variant: "destructive",
       });
+    }
+  };
+
+  // Navigate to profile page
+  const handleViewProfile = (connectionId: string, userId: string) => {
+    // For mock data, check if we have requester_id starting with "user"
+    if (userId.startsWith("user")) {
+      // Extract the user number from the ID (e.g., "user2" -> "2")
+      const userNumber = userId.replace("user", "");
+      navigate(`/user/user${userNumber}`);
+    } else {
+      // For Supabase data, use the actual ID
+      navigate(`/user/${userId}`);
     }
   };
 
@@ -276,8 +377,13 @@ const Connections = () => {
               {filteredConnections.map((connection) => (
                 <div 
                   key={connection.id} 
-                  className="glass-card rounded-xl p-6 hover-lift transition-all duration-300"
+                  className="glass-card rounded-xl p-6 hover-lift transition-all duration-300 cursor-pointer relative group"
+                  onClick={() => handleViewProfile(connection.id, connection.requester_id === user?.id ? connection.recipient_id : connection.requester_id)}
                 >
+                  <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ExternalLink className="h-4 w-4 text-primary" />
+                  </div>
+                  
                   <div className="flex items-center mb-4">
                     <div className="h-12 w-12 rounded-full bg-primary/10 text-primary flex items-center justify-center overflow-hidden mr-4">
                       {connection.profile?.avatar_url ? (
@@ -296,6 +402,7 @@ const Connections = () => {
                       <a 
                         href={`mailto:${connection.profile?.email}`} 
                         className="text-sm text-white/60 hover:text-primary flex items-center"
+                        onClick={(e) => e.stopPropagation()} // Prevent card click when clicking email
                       >
                         <Mail className="h-3 w-3 mr-1" />
                         {connection.profile?.email}
@@ -341,12 +448,15 @@ const Connections = () => {
                       </span>
                     </div>
                     
-                    {connection.status === 'pending' && (
+                    {connection.status === 'pending' && connection.recipient_id === user?.id && (
                       <div className="flex space-x-2">
                         <Button 
                           size="sm" 
                           variant="ghost" 
-                          onClick={() => handleAcceptConnection(connection.id)}
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent card click when clicking button
+                            handleAcceptConnection(connection.id);
+                          }}
                           className="text-white hover:text-green-500"
                         >
                           <UserCheck className="h-4 w-4" />
@@ -354,7 +464,10 @@ const Connections = () => {
                         <Button 
                           size="sm" 
                           variant="ghost" 
-                          onClick={() => handleRejectConnection(connection.id)}
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent card click when clicking button
+                            handleRejectConnection(connection.id);
+                          }}
                           className="text-white hover:text-red-500"
                         >
                           <UserX className="h-4 w-4" />

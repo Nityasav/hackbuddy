@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -8,6 +7,7 @@ import SkillCard from "@/components/SkillCard";
 import Button from "@/components/Button";
 import { Loader2, User, Github, Linkedin, Globe, Mail, MessageCircle, Plus, ArrowLeft, Check, X } from "lucide-react";
 import { toast } from "sonner";
+import type { UserProfile as UserProfileType } from "@/components/ProfileCard";
 
 const UserProfile = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -18,23 +18,86 @@ const UserProfile = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const navigate = useNavigate();
   
+  console.log("UserProfile - userId:", userId);
+  console.log("UserProfile - current connections:", connections);
+  console.log("UserProfile - pendingConnections:", pendingConnections);
+  
   // Check connection status
   const isPending = pendingConnections.some(conn => conn.userId === userId);
   const isConnected = connections.some(conn => conn.userId === userId);
   
+  // Function to copy email to clipboard
+  const copyEmailToClipboard = () => {
+    if (profile?.email) {
+      navigator.clipboard.writeText(profile.email)
+        .then(() => {
+          toast.success("Email copied to clipboard");
+        })
+        .catch((err) => {
+          console.error("Could not copy email: ", err);
+          toast.error("Failed to copy email");
+        });
+    }
+  };
+  
   useEffect(() => {
     const loadProfile = async () => {
       setIsLoading(true);
+      console.log("Loading profile for userId:", userId);
+      
       try {
         // In a real app, this would fetch user data from an API
         await new Promise(resolve => setTimeout(resolve, 500));
         
         if (userId) {
+          // Try to get user from context
           const userProfile = getUserById(userId);
+          console.log("Found profile:", userProfile);
           
           if (!userProfile) {
+            // If not found in context, check if we're using mock data
+            // This is a fallback for the connections page mock data
+            if (userId.startsWith("user")) {
+              console.log("Using mock data for user:", userId);
+              
+              // Create a mock profile based on userId
+              const mockProfile = {
+                id: userId,
+                name: userId === "user2" ? "Jordan Smith" : "Taylor Wong",
+                avatar: userId === "user2" 
+                  ? "https://randomuser.me/api/portraits/men/32.jpg" 
+                  : "https://randomuser.me/api/portraits/women/62.jpg",
+                role: userId === "user2" ? "UX/UI Designer" : "Data Scientist",
+                bio: userId === "user2" 
+                  ? "Passionate designer with a focus on creating intuitive and beautiful user interfaces."
+                  : "Data scientist with expertise in machine learning and AI.",
+                email: userId === "user2" ? "jordan@example.com" : "taylor@example.com",
+                github: "https://github.com/" + (userId === "user2" ? "jordansmith" : "taylorwong"),
+                linkedin: "https://linkedin.com/in/" + (userId === "user2" ? "jordansmith" : "taylorwong"),
+                website: userId === "user2" ? "https://jordansmith.design" : null,
+                skills: userId === "user2" 
+                  ? [
+                      { id: "s1", name: "UI Design", level: "expert" as const, category: "design" as const },
+                      { id: "s2", name: "Figma", level: "advanced" as const, category: "design" as const },
+                      { id: "s3", name: "Prototyping", level: "advanced" as const, category: "design" as const }
+                    ]
+                  : [
+                      { id: "s1", name: "Python", level: "expert" as const, category: "data" as const },
+                      { id: "s2", name: "Machine Learning", level: "advanced" as const, category: "data" as const },
+                      { id: "s3", name: "Data Visualization", level: "advanced" as const, category: "data" as const }
+                    ],
+                lookingFor: userId === "user2" 
+                  ? ["Frontend Developer", "Project Manager"]
+                  : ["Frontend Developer", "Backend Developer"]
+              } as UserProfileType;
+              
+              setProfile(mockProfile);
+              setIsLoading(false);
+              return;
+            }
+            
             toast.error("User not found");
-            navigate("/matches");
+            navigate("/connections");
             return;
           }
           
@@ -165,150 +228,103 @@ const UserProfile = () => {
                           <Button variant="outline" disabled className="flex items-center text-[hsl(var(--blue-accent))]">
                             <Check className="h-4 w-4 mr-1" /> Connected
                           </Button>
-                        ) : isPending ? (
-                          <Button variant="outline" disabled className="flex items-center">
-                            <Loader2 className="h-4 w-4 mr-1 animate-spin" /> Pending
-                          </Button>
                         ) : (
                           <Button 
-                            onClick={handleConnect}
-                            isLoading={isConnecting}
-                            className="flex items-center bg-[hsl(var(--blue-accent))]"
+                            variant="outline" 
+                            onClick={handleMessage}
+                            className="flex items-center border-[hsl(var(--blue-accent))]/20 hover:bg-[hsl(var(--blue-accent))]/10"
                           >
-                            {!isConnecting && <Plus className="h-4 w-4 mr-1" />} Connect
+                            <MessageCircle className="h-4 w-4 mr-1" /> Message
                           </Button>
                         )}
-                        
-                        <Button 
-                          variant="outline" 
-                          onClick={handleMessage}
-                          className="flex items-center border-[hsl(var(--blue-accent))]/20 hover:bg-[hsl(var(--blue-accent))]/10"
-                        >
-                          <MessageCircle className="h-4 w-4 mr-1" /> Message
-                        </Button>
                       </>
                     )}
                     
-                    <a 
-                      href={`mailto:${profile.email}`}
-                      className="inline-flex items-center px-4 py-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-md text-sm font-medium transition-colors"
+                    <Button
+                      variant="secondary"
+                      onClick={copyEmailToClipboard}
+                      className="inline-flex items-center text-secondary-foreground transition-colors"
                     >
-                      <Mail className="h-4 w-4 mr-1" /> Email
-                    </a>
+                      <Mail className="h-4 w-4 mr-1" /> Copy Email
+                    </Button>
                   </div>
                 </div>
               </div>
             </div>
             
-            <div className="grid md:grid-cols-2 gap-8 p-8 md:p-10">
-              {/* Skills */}
-              <div>
-                <h2 className="text-xl font-semibold mb-4 neon-text-blue">Skills</h2>
-                
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {profile.skills.map((skill) => (
-                    <SkillCard
-                      key={skill.id}
-                      skill={skill}
-                    />
-                  ))}
-                </div>
-              </div>
+            {/* Social Links */}
+            <div className="p-8 md:p-10">
+              <h2 className="text-xl font-semibold mb-4 neon-text">Links</h2>
               
-              {/* Looking For */}
-              <div>
-                <h2 className="text-xl font-semibold mb-4 neon-text">Looking For</h2>
-                
-                {profile.lookingFor.length > 0 ? (
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {profile.lookingFor.map((item, index) => (
-                      <span 
-                        key={index}
-                        className="px-3 py-1.5 text-sm rounded-full bg-secondary text-secondary-foreground"
-                      >
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-foreground/60 mb-6">Not specified</p>
-                )}
-              </div>
-              
-              {/* Social Links */}
-              <div className="md:col-span-2">
-                <h2 className="text-xl font-semibold mb-4 neon-text">Links</h2>
-                
-                <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {profile.github && (
-                    <a 
-                      href={profile.github} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
-                    >
-                      <div className="h-10 w-10 rounded-full bg-background/50 border border-border flex items-center justify-center">
-                        <Github className="h-5 w-5" />
-                      </div>
-                      <div className="overflow-hidden">
-                        <p className="font-medium">GitHub</p>
-                        <p className="text-sm text-foreground/60 truncate">
-                          {profile.github.replace(/^https?:\/\/(www\.)?github\.com\//, '')}
-                        </p>
-                      </div>
-                    </a>
-                  )}
-                  
-                  {profile.linkedin && (
-                    <a 
-                      href={profile.linkedin} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
-                    >
-                      <div className="h-10 w-10 rounded-full bg-background/50 border border-border flex items-center justify-center">
-                        <Linkedin className="h-5 w-5" />
-                      </div>
-                      <div className="overflow-hidden">
-                        <p className="font-medium">LinkedIn</p>
-                        <p className="text-sm text-foreground/60 truncate">
-                          {profile.linkedin.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, '')}
-                        </p>
-                      </div>
-                    </a>
-                  )}
-                  
-                  {profile.website && (
-                    <a 
-                      href={profile.website} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
-                    >
-                      <div className="h-10 w-10 rounded-full bg-background/50 border border-border flex items-center justify-center">
-                        <Globe className="h-5 w-5" />
-                      </div>
-                      <div className="overflow-hidden">
-                        <p className="font-medium">Website</p>
-                        <p className="text-sm text-foreground/60 truncate">
-                          {profile.website.replace(/^https?:\/\/(www\.)?/, '')}
-                        </p>
-                      </div>
-                    </a>
-                  )}
-                  
+              <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {profile.github && (
                   <a 
-                    href={`mailto:${profile.email}`} 
+                    href={profile.github} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
                     className="flex items-center gap-3 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
                   >
                     <div className="h-10 w-10 rounded-full bg-background/50 border border-border flex items-center justify-center">
-                      <Mail className="h-5 w-5" />
+                      <Github className="h-5 w-5" />
                     </div>
                     <div className="overflow-hidden">
-                      <p className="font-medium">Email</p>
-                      <p className="text-sm text-foreground/60 truncate">{profile.email}</p>
+                      <p className="font-medium">GitHub</p>
+                      <p className="text-sm text-foreground/60 truncate">
+                        {profile.github.replace(/^https?:\/\/(www\.)?github\.com\//, '')}
+                      </p>
                     </div>
                   </a>
+                )}
+                
+                {profile.linkedin && (
+                  <a 
+                    href={profile.linkedin} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                  >
+                    <div className="h-10 w-10 rounded-full bg-background/50 border border-border flex items-center justify-center">
+                      <Linkedin className="h-5 w-5" />
+                    </div>
+                    <div className="overflow-hidden">
+                      <p className="font-medium">LinkedIn</p>
+                      <p className="text-sm text-foreground/60 truncate">
+                        {profile.linkedin.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, '')}
+                      </p>
+                    </div>
+                  </a>
+                )}
+                
+                {profile.website && (
+                  <a 
+                    href={profile.website} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                  >
+                    <div className="h-10 w-10 rounded-full bg-background/50 border border-border flex items-center justify-center">
+                      <Globe className="h-5 w-5" />
+                    </div>
+                    <div className="overflow-hidden">
+                      <p className="font-medium">Website</p>
+                      <p className="text-sm text-foreground/60 truncate">
+                        {profile.website.replace(/^https?:\/\/(www\.)?/, '')}
+                      </p>
+                    </div>
+                  </a>
+                )}
+                
+                <div 
+                  onClick={copyEmailToClipboard}
+                  className="flex items-center gap-3 p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors cursor-pointer"
+                >
+                  <div className="h-10 w-10 rounded-full bg-background/50 border border-border flex items-center justify-center">
+                    <Mail className="h-5 w-5" />
+                  </div>
+                  <div className="overflow-hidden">
+                    <p className="font-medium">Email</p>
+                    <p className="text-sm text-foreground/60 truncate">{profile.email}</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -320,3 +336,4 @@ const UserProfile = () => {
 };
 
 export default UserProfile;
+
