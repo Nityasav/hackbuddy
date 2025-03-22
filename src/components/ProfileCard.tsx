@@ -1,9 +1,11 @@
 
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import SkillCard, { Skill } from "./SkillCard";
 import Button from "./Button";
-import { Mail, MessageCircle, Plus, User } from "lucide-react";
+import { Mail, MessageCircle, Plus, User, Check, X, Loader2 } from "lucide-react";
+import { useUser } from "@/context/UserContext";
 
 export type UserProfile = {
   id: string;
@@ -15,6 +17,7 @@ export type UserProfile = {
   email: string;
   github?: string;
   linkedin?: string;
+  website?: string | null;
   lookingFor: string[];
   matchPercentage?: number;
 };
@@ -35,24 +38,73 @@ const ProfileCard = ({
   onMessage 
 }: ProfileCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [isMessaging, setIsMessaging] = useState(false);
+  const { user, sendConnectionRequest, sendMessage } = useUser();
+  const navigate = useNavigate();
   
   const handleImageLoad = () => {
     setImageLoaded(true);
   };
 
+  const handleConnect = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    if (!onConnect) return;
+    
+    try {
+      setIsConnecting(true);
+      await sendConnectionRequest(profile.id);
+      onConnect(profile.id);
+    } catch (error) {
+      console.error("Error connecting:", error);
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  const handleMessage = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    if (!onMessage) return;
+    
+    try {
+      setIsMessaging(true);
+      
+      // In a real app, this would open a message dialog
+      // For now, we'll just send a default message
+      if (user) {
+        await sendMessage(profile.id, `Hi ${profile.name}, I'd like to connect with you!`);
+      }
+      
+      onMessage(profile.id);
+    } catch (error) {
+      console.error("Error messaging:", error);
+    } finally {
+      setIsMessaging(false);
+    }
+  };
+
+  const handleCardClick = () => {
+    navigate(`/user/${profile.id}`);
+  };
+
   return (
     <div 
       className={cn(
-        "glass-card rounded-2xl overflow-hidden transition-all hover-lift",
+        "glass-card rounded-2xl overflow-hidden transition-all hover-lift cursor-pointer",
         className
       )}
+      onClick={handleCardClick}
     >
       <div className="relative">
         {/* Avatar and Match Percentage */}
         <div className="p-6 pb-0 flex justify-between items-start">
           <div className="flex items-center">
             <div className={cn(
-              "relative h-16 w-16 rounded-xl overflow-hidden border-2 border-white shadow-sm mr-4",
+              "relative h-16 w-16 rounded-xl overflow-hidden border-2 border-primary/40 shadow-sm mr-4",
               !imageLoaded && "image-loading"
             )}>
               {profile.avatar ? (
@@ -80,7 +132,7 @@ const ProfileCard = ({
           
           {profile.matchPercentage && (
             <div className="flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 border border-primary/20">
-              <span className="text-primary font-semibold">
+              <span className="text-primary font-semibold neon-text">
                 {profile.matchPercentage}%
               </span>
             </div>
@@ -136,10 +188,11 @@ const ProfileCard = ({
           {onConnect && (
             <Button 
               size="sm" 
-              onClick={() => onConnect(profile.id)}
+              onClick={handleConnect}
               className="flex-1 mr-2"
+              isLoading={isConnecting}
             >
-              <Plus className="h-4 w-4 mr-1" /> Connect
+              {!isConnecting && <Plus className="h-4 w-4 mr-1" />} Connect
             </Button>
           )}
           
@@ -147,10 +200,11 @@ const ProfileCard = ({
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => onMessage(profile.id)}
+              onClick={handleMessage}
               className="flex-1"
+              isLoading={isMessaging}
             >
-              <MessageCircle className="h-4 w-4 mr-1" /> Message
+              {!isMessaging && <MessageCircle className="h-4 w-4 mr-1" />} Message
             </Button>
           )}
           
@@ -158,6 +212,7 @@ const ProfileCard = ({
             <a 
               href={`mailto:${profile.email}`}
               className="ml-2 p-2 rounded-full bg-secondary hover:bg-secondary/80 text-secondary-foreground transition-colors"
+              onClick={(e) => e.stopPropagation()}
             >
               <Mail className="h-5 w-5" />
             </a>

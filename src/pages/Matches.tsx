@@ -1,5 +1,6 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { useUser } from "@/context/UserContext";
 import { UserProfile } from "@/components/ProfileCard";
@@ -7,6 +8,7 @@ import ProfileCard from "@/components/ProfileCard";
 import SkillCard, { Skill } from "@/components/SkillCard";
 import Button from "@/components/Button";
 import { Check, Filter, Loader2, Search, UserCheck, X } from "lucide-react";
+import { toast } from "sonner";
 
 // Mock potential matches data
 const mockPotentialMatches: UserProfile[] = [
@@ -23,6 +25,9 @@ const mockPotentialMatches: UserProfile[] = [
       { id: "s4", name: "HTML/CSS", level: "intermediate", category: "frontend" }
     ],
     email: "jordan@example.com",
+    github: "https://github.com/jordansmith",
+    linkedin: "https://linkedin.com/in/jordansmith",
+    website: "https://jordansmith.design",
     lookingFor: ["Frontend Developer", "Project Manager"],
     matchPercentage: 95
   },
@@ -39,6 +44,9 @@ const mockPotentialMatches: UserProfile[] = [
       { id: "s4", name: "SQL", level: "intermediate", category: "backend" }
     ],
     email: "taylor@example.com",
+    github: "https://github.com/taylorwong",
+    linkedin: "https://linkedin.com/in/taylorwong",
+    website: null,
     lookingFor: ["Frontend Developer", "Backend Developer"],
     matchPercentage: 87
   },
@@ -55,6 +63,9 @@ const mockPotentialMatches: UserProfile[] = [
       { id: "s4", name: "GraphQL", level: "intermediate", category: "backend" }
     ],
     email: "casey@example.com",
+    github: "https://github.com/caseymartinez",
+    linkedin: "https://linkedin.com/in/caseymartinez",
+    website: "https://caseymartinez.io",
     lookingFor: ["Frontend Developer", "UI Designer", "Project Manager"],
     matchPercentage: 82
   },
@@ -71,6 +82,9 @@ const mockPotentialMatches: UserProfile[] = [
       { id: "s4", name: "Firebase", level: "intermediate", category: "backend" }
     ],
     email: "robin@example.com",
+    github: "https://github.com/robinchen",
+    linkedin: "https://linkedin.com/in/robinchen",
+    website: null,
     lookingFor: ["UI Designer", "Backend Developer"],
     matchPercentage: 78
   },
@@ -87,6 +101,9 @@ const mockPotentialMatches: UserProfile[] = [
       { id: "s4", name: "Product Management", level: "intermediate", category: "other" }
     ],
     email: "avery@example.com",
+    github: "https://github.com/averywilliams",
+    linkedin: "https://linkedin.com/in/averywilliams",
+    website: "https://averywilliams.com",
     lookingFor: ["Frontend Developer", "Backend Developer", "UI Designer"],
     matchPercentage: 73
   }
@@ -102,12 +119,13 @@ const skillCategories = [
 ];
 
 const Matches = () => {
-  const { user, isLoading } = useUser();
+  const { user, isLoading, sendConnectionRequest, sendMessage } = useUser();
   const [matches, setMatches] = useState(mockPotentialMatches);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterSkills, setFilterSkills] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const navigate = useNavigate();
   
   const handleSearch = () => {
     setIsSearching(true);
@@ -149,6 +167,33 @@ const Matches = () => {
     setMatches(mockPotentialMatches);
   };
   
+  const handleConnect = async (id: string) => {
+    try {
+      await sendConnectionRequest(id);
+      toast.success("Connection request sent");
+    } catch (error) {
+      console.error("Error connecting:", error);
+    }
+  };
+  
+  const handleMessage = async (id: string) => {
+    try {
+      if (user) {
+        const match = matches.find(m => m.id === id);
+        if (match) {
+          await sendMessage(id, `Hi ${match.name}, I'd like to connect with you!`);
+          toast.success("Message sent");
+        }
+      }
+    } catch (error) {
+      console.error("Error messaging:", error);
+    }
+  };
+  
+  const handleProfileClick = (id: string) => {
+    navigate(`/user/${id}`);
+  };
+  
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -169,13 +214,17 @@ const Matches = () => {
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center max-w-md px-4">
-            <h2 className="text-2xl font-bold mb-4">Sign in to view matches</h2>
+            <h2 className="text-2xl font-bold mb-4 neon-text">Sign in to view matches</h2>
             <p className="text-foreground/70 mb-6">
               You need to sign in or create an account to view potential teammates.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button>Sign In</Button>
-              <Button variant="outline">Create Profile</Button>
+              <Link to="/login">
+                <Button>Sign In</Button>
+              </Link>
+              <Link to="/register">
+                <Button variant="outline">Create Profile</Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -184,12 +233,12 @@ const Matches = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-background to-background/80">
       <Navbar />
       <main className="flex-1 pt-24 pb-16">
         <div className="container px-4 mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold mb-3">Find Your Team</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-3 neon-text">Find Your Team</h1>
             <p className="text-foreground/70">
               Browse potential teammates based on your skills and preferences
             </p>
@@ -205,7 +254,7 @@ const Matches = () => {
                   </div>
                   <input
                     type="text"
-                    className="w-full pl-10 pr-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+                    className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
                     placeholder="Search by name, role, or skill..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -235,7 +284,7 @@ const Matches = () => {
               
               {/* Filters */}
               {showFilters && (
-                <div className="pt-4 border-t animate-slide-in">
+                <div className="pt-4 border-t border-border animate-slide-in">
                   <div className="mb-4">
                     <h3 className="text-sm font-medium mb-2">Filter by skill category:</h3>
                     <div className="flex flex-wrap gap-2">
@@ -279,7 +328,7 @@ const Matches = () => {
           {/* Results */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold">
+              <h2 className="text-2xl font-bold neon-text">
                 {isSearching ? "Searching..." : `${matches.length} Potential Teammates`}
               </h2>
             </div>
@@ -290,8 +339,8 @@ const Matches = () => {
                   <ProfileCard
                     key={profile.id}
                     profile={profile}
-                    onConnect={(id) => console.log(`Connect with: ${id}`)}
-                    onMessage={(id) => console.log(`Message: ${id}`)}
+                    onConnect={handleConnect}
+                    onMessage={handleMessage}
                   />
                 ))}
               </div>

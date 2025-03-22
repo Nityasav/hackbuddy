@@ -1,14 +1,17 @@
 
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Menu, X, User, LogIn } from "lucide-react";
+import { Menu, X, User, LogIn, LogOut } from "lucide-react";
 import Button from "./Button";
+import { useUser } from "@/context/UserContext";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout, isAuthenticated } = useUser();
   
   // Detect if page is scrolled
   useEffect(() => {
@@ -24,6 +27,11 @@ const Navbar = () => {
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
+  
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   const navigation = [
     { name: "Home", href: "/" },
@@ -45,8 +53,8 @@ const Navbar = () => {
           to="/" 
           className="text-xl font-bold tracking-tight flex items-center"
         >
-          <span className="text-primary mr-1">Team</span>
-          <span>Finder</span>
+          <span className="text-primary neon-text">Hack</span>
+          <span>Buddy</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -58,7 +66,7 @@ const Navbar = () => {
               className={cn(
                 "px-3 py-2 rounded-md text-sm font-medium transition-colors",
                 location.pathname === item.href
-                  ? "text-primary"
+                  ? "text-primary neon-text"
                   : "text-foreground/80 hover:text-primary hover:bg-secondary/50"
               )}
             >
@@ -69,18 +77,40 @@ const Navbar = () => {
 
         {/* Action Buttons */}
         <div className="hidden md:flex items-center space-x-4">
-          <Link to="/profile">
-            <Button variant="ghost" size="sm" className="flex items-center">
-              <User className="h-4 w-4 mr-1" />
-              Profile
-            </Button>
-          </Link>
-          <Link to="/login">
-            <Button size="sm" className="flex items-center">
-              <LogIn className="h-4 w-4 mr-1" />
-              Sign In
-            </Button>
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <Link to="/profile">
+                <Button variant="ghost" size="sm" className="flex items-center">
+                  <User className="h-4 w-4 mr-1" />
+                  Profile
+                </Button>
+              </Link>
+              <Button 
+                size="sm" 
+                variant="outline"
+                className="flex items-center"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-4 w-4 mr-1" />
+                Sign Out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button size="sm" className="flex items-center">
+                  <LogIn className="h-4 w-4 mr-1" />
+                  Sign In
+                </Button>
+              </Link>
+              <Link to="/register">
+                <Button size="sm" variant="outline" className="flex items-center">
+                  <User className="h-4 w-4 mr-1" />
+                  Register
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile menu button */}
@@ -111,19 +141,50 @@ const Navbar = () => {
               className={cn(
                 "block px-3 py-2 rounded-md text-base font-medium transition-colors",
                 location.pathname === item.href
-                  ? "text-primary"
+                  ? "text-primary neon-text"
                   : "text-foreground/80 hover:text-primary hover:bg-secondary/50"
               )}
             >
               {item.name}
             </Link>
           ))}
-          <Link to="/login" className="block px-3 py-2 mt-4">
-            <Button size="sm" className="w-full flex items-center justify-center">
-              <LogIn className="h-4 w-4 mr-1" />
-              Sign In
-            </Button>
-          </Link>
+          
+          {isAuthenticated ? (
+            <>
+              <button 
+                onClick={handleLogout}
+                className="block w-full px-3 py-2 mt-4"
+              >
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  className="w-full flex items-center justify-center"
+                >
+                  <LogOut className="h-4 w-4 mr-1" />
+                  Sign Out
+                </Button>
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="block px-3 py-2 mt-4">
+                <Button size="sm" className="w-full flex items-center justify-center">
+                  <LogIn className="h-4 w-4 mr-1" />
+                  Sign In
+                </Button>
+              </Link>
+              <Link to="/register" className="block px-3 py-2 mt-2">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  className="w-full flex items-center justify-center"
+                >
+                  <User className="h-4 w-4 mr-1" />
+                  Register
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>

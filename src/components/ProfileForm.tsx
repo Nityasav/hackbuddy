@@ -1,10 +1,12 @@
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Button from "./Button";
-import { Plus, Save, Trash, X } from "lucide-react";
+import { Plus, Save, Trash, X, Upload, Camera, User } from "lucide-react";
 import { Skill } from "./SkillCard";
 import SkillCard from "./SkillCard";
 import { cn } from "@/lib/utils";
+import { useUser } from "@/context/UserContext";
+import { toast } from "sonner";
 
 interface ProfileFormProps {
   onSave: (profileData: ProfileFormData) => void;
@@ -19,6 +21,8 @@ export interface ProfileFormData {
   email: string;
   github?: string;
   linkedin?: string;
+  website?: string;
+  avatar?: string;
   skills: Skill[];
   lookingFor: string[];
 }
@@ -42,6 +46,9 @@ const skillLevels = [
 const defaultSkills: Skill[] = [];
 
 const ProfileForm = ({ onSave, initialData, className }: ProfileFormProps) => {
+  const { uploadAvatar } = useUser();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const [formData, setFormData] = useState<ProfileFormData>(initialData || {
     name: "",
     role: "",
@@ -49,6 +56,8 @@ const ProfileForm = ({ onSave, initialData, className }: ProfileFormProps) => {
     email: "",
     github: "",
     linkedin: "",
+    website: "",
+    avatar: "",
     skills: defaultSkills,
     lookingFor: []
   });
@@ -61,6 +70,7 @@ const ProfileForm = ({ onSave, initialData, className }: ProfileFormProps) => {
   
   const [newLookingFor, setNewLookingFor] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -120,6 +130,52 @@ const ProfileForm = ({ onSave, initialData, className }: ProfileFormProps) => {
     }));
   };
   
+  // Handle avatar upload button click
+  const handleUploadClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+  
+  // Handle avatar file selection
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    
+    if (!files || files.length === 0) return;
+    
+    const file = files[0];
+    
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      toast.error("Please select an image file");
+      return;
+    }
+    
+    // Check file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("File size should be less than 2MB");
+      return;
+    }
+    
+    setIsUploading(true);
+    
+    try {
+      const avatarUrl = await uploadAvatar(file);
+      
+      setFormData(prev => ({
+        ...prev,
+        avatar: avatarUrl
+      }));
+      
+      toast.success("Profile picture uploaded");
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+      toast.error("Failed to upload profile picture");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+  
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,7 +195,61 @@ const ProfileForm = ({ onSave, initialData, className }: ProfileFormProps) => {
     <form onSubmit={handleSubmit} className={cn("space-y-8", className)}>
       {/* Basic Information */}
       <div className="glass-card rounded-xl p-6">
-        <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
+        <h2 className="text-xl font-semibold mb-6 neon-text">Basic Information</h2>
+        
+        {/* Avatar Upload */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="relative group cursor-pointer mb-4" onClick={handleUploadClick}>
+            <div className={cn(
+              "h-32 w-32 rounded-full overflow-hidden border-2 border-primary/40 shadow-lg transition-all duration-300",
+              isUploading && "opacity-60"
+            )}>
+              {formData.avatar ? (
+                <img
+                  src={formData.avatar}
+                  alt={formData.name || "Profile"}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="h-full w-full bg-secondary flex items-center justify-center">
+                  <User className="h-16 w-16 text-secondary-foreground/60" />
+                </div>
+              )}
+            </div>
+            
+            {/* Hover overlay */}
+            <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
+              <Camera className="h-8 w-8 text-white" />
+            </div>
+            
+            {/* Loading indicator */}
+            {isUploading && (
+              <div className="absolute inset-0 rounded-full flex items-center justify-center">
+                <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
+          </div>
+          
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+          
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={handleUploadClick}
+            disabled={isUploading}
+            className="flex items-center"
+          >
+            <Upload className="h-4 w-4 mr-1" />
+            {formData.avatar ? "Change Picture" : "Upload Picture"}
+          </Button>
+        </div>
         
         <div className="grid md:grid-cols-2 gap-6">
           <div className="space-y-2">
@@ -153,7 +263,7 @@ const ProfileForm = ({ onSave, initialData, className }: ProfileFormProps) => {
               value={formData.name}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+              className="w-full px-4 py-2 rounded-lg border border-border bg-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
               placeholder="John Doe"
             />
           </div>
@@ -169,7 +279,7 @@ const ProfileForm = ({ onSave, initialData, className }: ProfileFormProps) => {
               value={formData.role}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+              className="w-full px-4 py-2 rounded-lg border border-border bg-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
               placeholder="Frontend Developer"
             />
           </div>
@@ -185,7 +295,7 @@ const ProfileForm = ({ onSave, initialData, className }: ProfileFormProps) => {
               onChange={handleChange}
               required
               rows={4}
-              className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+              className="w-full px-4 py-2 rounded-lg border border-border bg-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
               placeholder="Tell us about yourself, your experience, and what you're passionate about..."
             />
           </div>
@@ -201,7 +311,7 @@ const ProfileForm = ({ onSave, initialData, className }: ProfileFormProps) => {
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+              className="w-full px-4 py-2 rounded-lg border border-border bg-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
               placeholder="john@example.com"
             />
           </div>
@@ -216,8 +326,38 @@ const ProfileForm = ({ onSave, initialData, className }: ProfileFormProps) => {
               type="url"
               value={formData.github}
               onChange={handleChange}
-              className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+              className="w-full px-4 py-2 rounded-lg border border-border bg-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
               placeholder="https://github.com/username"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <label htmlFor="linkedin" className="block text-sm font-medium">
+              LinkedIn (optional)
+            </label>
+            <input
+              id="linkedin"
+              name="linkedin"
+              type="url"
+              value={formData.linkedin}
+              onChange={handleChange}
+              className="w-full px-4 py-2 rounded-lg border border-border bg-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+              placeholder="https://linkedin.com/in/username"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <label htmlFor="website" className="block text-sm font-medium">
+              Personal Website (optional)
+            </label>
+            <input
+              id="website"
+              name="website"
+              type="url"
+              value={formData.website}
+              onChange={handleChange}
+              className="w-full px-4 py-2 rounded-lg border border-border bg-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+              placeholder="https://yourwebsite.com"
             />
           </div>
         </div>
@@ -225,7 +365,7 @@ const ProfileForm = ({ onSave, initialData, className }: ProfileFormProps) => {
       
       {/* Skills */}
       <div className="glass-card rounded-xl p-6">
-        <h2 className="text-xl font-semibold mb-4">Skills</h2>
+        <h2 className="text-xl font-semibold mb-4 neon-text">Skills</h2>
         
         {/* Current Skills */}
         <div className="mb-6">
@@ -260,7 +400,7 @@ const ProfileForm = ({ onSave, initialData, className }: ProfileFormProps) => {
               type="text"
               value={newSkill.name}
               onChange={(e) => setNewSkill({ ...newSkill, name: e.target.value })}
-              className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+              className="w-full px-4 py-2 rounded-lg border border-border bg-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
               placeholder="React, UI Design, Python, etc."
             />
           </div>
@@ -273,7 +413,7 @@ const ProfileForm = ({ onSave, initialData, className }: ProfileFormProps) => {
               id="skillCategory"
               value={newSkill.category}
               onChange={(e) => setNewSkill({ ...newSkill, category: e.target.value })}
-              className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+              className="w-full px-4 py-2 rounded-lg border border-border bg-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
             >
               {skillCategories.map((category) => (
                 <option key={category.value} value={category.value}>
@@ -291,7 +431,7 @@ const ProfileForm = ({ onSave, initialData, className }: ProfileFormProps) => {
               id="skillLevel"
               value={newSkill.level}
               onChange={(e) => setNewSkill({ ...newSkill, level: e.target.value })}
-              className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+              className="w-full px-4 py-2 rounded-lg border border-border bg-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
             >
               {skillLevels.map((level) => (
                 <option key={level.value} value={level.value}>
@@ -317,7 +457,7 @@ const ProfileForm = ({ onSave, initialData, className }: ProfileFormProps) => {
       
       {/* Looking For */}
       <div className="glass-card rounded-xl p-6">
-        <h2 className="text-xl font-semibold mb-4">What You're Looking For</h2>
+        <h2 className="text-xl font-semibold mb-4 neon-text">What You're Looking For</h2>
         
         {/* Current Looking For */}
         <div className="mb-6">
@@ -328,10 +468,11 @@ const ProfileForm = ({ onSave, initialData, className }: ProfileFormProps) => {
               {formData.lookingFor.map((item, index) => (
                 <div 
                   key={index}
-                  className="group relative flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm font-medium transition-all bg-secondary text-secondary-foreground hover-scale"
+                  className="group relative flex items-center gap-2 px-3 py-1.5 rounded-full border border-border text-sm font-medium transition-all bg-secondary text-secondary-foreground hover-scale"
                 >
                   {item}
                   <button 
+                    type="button"
                     onClick={() => handleRemoveLookingFor(index)}
                     className="ml-1 text-foreground/40 hover:text-foreground/70 transition-colors"
                   >
@@ -358,7 +499,7 @@ const ProfileForm = ({ onSave, initialData, className }: ProfileFormProps) => {
               type="text"
               value={newLookingFor}
               onChange={(e) => setNewLookingFor(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
+              className="w-full px-4 py-2 rounded-lg border border-border bg-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all"
               placeholder="UI Designer, Backend Developer, etc."
             />
           </div>

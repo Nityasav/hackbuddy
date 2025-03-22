@@ -19,6 +19,8 @@ const Profile = () => {
         email: user.email,
         github: user.github || "",
         linkedin: user.linkedin || "",
+        website: user.website || "",
+        avatar: user.avatar,
         skills: user.skills,
         lookingFor: user.lookingFor
       });
@@ -38,6 +40,8 @@ const Profile = () => {
         email: data.email,
         github: data.github,
         linkedin: data.linkedin,
+        website: data.website,
+        avatar: data.avatar,
         skills: data.skills,
         lookingFor: data.lookingFor
       });
@@ -51,7 +55,7 @@ const Profile = () => {
   
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-background to-background/80">
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
@@ -64,12 +68,12 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-background to-background/80">
       <Navbar />
       <main className="flex-1 pt-24 pb-16">
         <div className="container px-4 mx-auto max-w-4xl">
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold mb-3">Your Profile</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-3 neon-text">Your Profile</h1>
             <p className="text-foreground/70">
               Keep your profile up to date to get the best matches
             </p>

@@ -7,48 +7,26 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 224 71.4% 4.1%;
-    --card: 0 0% 100%;
-    --card-foreground: 224 71.4% 4.1%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 71.4% 4.1%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 220 14.3% 95.9%;
-    --secondary-foreground: 220.9 39.3% 11%;
-    --muted: 220 14.3% 95.9%;
-    --muted-foreground: 220 8.9% 46.1%;
-    --accent: 220 14.3% 95.9%;
-    --accent-foreground: 220.9 39.3% 11%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 217.2 91.2% 59.8%;
-    --radius: 0.75rem;
-  }
-
-  .dark {
-    --background: 224 71.4% 4.1%;
+    --background: 230 36% 10%;
     --foreground: 210 20% 98%;
-    --card: 224 71.4% 4.1%;
+    --card: 230 36% 12%;
     --card-foreground: 210 20% 98%;
-    --popover: 224 71.4% 4.1%;
+    --popover: 230 36% 12%;
     --popover-foreground: 210 20% 98%;
-    --primary: 217.2 91.2% 59.8%;
+    --primary: 327 73% 65%;
     --primary-foreground: 210 20% 98%;
-    --secondary: 215 27.9% 16.9%;
+    --secondary: 230 36% 16%;
     --secondary-foreground: 210 20% 98%;
-    --muted: 215 27.9% 16.9%;
+    --muted: 230 36% 16%;
     --muted-foreground: 217.9 10.6% 64.9%;
-    --accent: 215 27.9% 16.9%;
+    --accent: 230 36% 16%;
     --accent-foreground: 210 20% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 20% 98%;
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
-    --ring: 217.2 91.2% 59.8%;
+    --border: 230 36% 16%;
+    --input: 230 36% 16%;
+    --ring: 327 73% 65%;
+    --radius: 0.75rem;
   }
 }
 
@@ -64,25 +42,25 @@
 
   /* Custom Glass Effect */
   .glass {
-    @apply bg-white/10 backdrop-blur-xl border border-white/20 shadow-lg;
+    @apply bg-black/30 backdrop-blur-xl border border-white/10 shadow-lg;
   }
 
   .glass-dark {
-    @apply bg-black/10 backdrop-blur-xl border border-white/10 shadow-lg;
+    @apply bg-black/20 backdrop-blur-xl border border-white/10 shadow-lg;
   }
 
   .glass-card {
-    @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-md;
+    @apply bg-black/20 backdrop-blur-md border border-white/10 shadow-md;
   }
 
   /* Image loading effects */
   .image-loading {
-    @apply relative overflow-hidden bg-gray-100;
+    @apply relative overflow-hidden bg-gray-800;
   }
   
   .image-loading::after {
     content: "";
-    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse;
+    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse;
     transform: translateX(-100%);
     animation: loading 1.5s infinite;
   }
@@ -101,6 +79,36 @@
   /* Text balance for better typography */
   p, h1, h2, h3, h4, h5, h6 {
     text-wrap: balance;
+  }
+
+  /* Neon effects */
+  .neon-text {
+    @apply text-primary;
+    text-shadow: 0 0 5px theme('colors.primary.DEFAULT'), 
+                 0 0 20px theme('colors.primary.DEFAULT');
+  }
+
+  .neon-box {
+    @apply border border-primary/60;
+    box-shadow: 0 0 5px theme('colors.primary.DEFAULT'),
+                inset 0 0 5px theme('colors.primary.DEFAULT');
+  }
+
+  .neon-glow {
+    filter: drop-shadow(0 0 8px theme('colors.primary.DEFAULT'));
+  }
+
+  /* Gradient backgrounds */
+  .bg-gradient-blue-pink {
+    @apply bg-gradient-to-br from-blue-600 to-pink-500;
+  }
+
+  .bg-gradient-dark-blue {
+    @apply bg-gradient-to-br from-blue-900 to-indigo-900;
+  }
+
+  .bg-gradient-neon {
+    @apply bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-blue-500/20;
   }
 }
 
@@ -127,7 +135,7 @@
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -135,11 +143,11 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 rounded-full;
+  @apply bg-primary/30 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400;
+  @apply bg-primary/50;
 }
 
 /* Hover effects */
@@ -157,4 +165,19 @@
 
 .hover-lift:hover {
   @apply transform -translate-y-1 shadow-lg;
+}
+
+/* Advanced blur effects for cards */
+.frosted-glass {
+  @apply relative overflow-hidden;
+}
+
+.frosted-glass::before {
+  content: '';
+  @apply absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 rounded-inherit backdrop-blur-xl z-[-1];
+}
+
+.frosted-glass::after {
+  content: '';
+  @apply absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 rounded-inherit z-[-2];
 }
