@@ -6,6 +6,7 @@ import SkillCard, { Skill } from "./SkillCard";
 import Button from "./Button";
 import { Mail, MessageCircle, Plus, User, Check, X, Loader2 } from "lucide-react";
 import { useUser } from "@/context/UserContext";
+import { useMessaging } from "@/context/MessagingContext";
 
 export type UserProfile = {
   id: string;
@@ -40,8 +41,13 @@ const ProfileCard = ({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isMessaging, setIsMessaging] = useState(false);
-  const { user, sendConnectionRequest, sendMessage } = useUser();
+  const { user, sendConnectionRequest, sendMessage, connections, pendingConnections } = useUser();
+  const { openChat } = useMessaging();
   const navigate = useNavigate();
+  
+  // Check connection status
+  const isPending = pendingConnections.some(conn => conn.userId === profile.id);
+  const isConnected = connections.some(conn => conn.userId === profile.id);
   
   const handleImageLoad = () => {
     setImageLoaded(true);
@@ -51,12 +57,19 @@ const ProfileCard = ({
     e.stopPropagation();
     e.preventDefault();
     
-    if (!onConnect) return;
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    
+    if (isConnected || isPending) return;
     
     try {
       setIsConnecting(true);
       await sendConnectionRequest(profile.id);
-      onConnect(profile.id);
+      if (onConnect) {
+        onConnect(profile.id);
+      }
     } catch (error) {
       console.error("Error connecting:", error);
     } finally {
@@ -64,26 +77,20 @@ const ProfileCard = ({
     }
   };
 
-  const handleMessage = async (e: React.MouseEvent) => {
+  const handleMessage = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     
-    if (!onMessage) return;
+    if (!user) {
+      navigate("/login");
+      return;
+    }
     
-    try {
-      setIsMessaging(true);
-      
-      // In a real app, this would open a message dialog
-      // For now, we'll just send a default message
-      if (user) {
-        await sendMessage(profile.id, `Hi ${profile.name}, I'd like to connect with you!`);
-      }
-      
+    // Open the chat popup
+    openChat(profile);
+    
+    if (onMessage) {
       onMessage(profile.id);
-    } catch (error) {
-      console.error("Error messaging:", error);
-    } finally {
-      setIsMessaging(false);
     }
   };
 
@@ -104,7 +111,7 @@ const ProfileCard = ({
         <div className="p-6 pb-0 flex justify-between items-start">
           <div className="flex items-center">
             <div className={cn(
-              "relative h-16 w-16 rounded-xl overflow-hidden border-2 border-primary/40 shadow-sm mr-4",
+              "relative h-16 w-16 rounded-xl overflow-hidden border-2 border-[hsl(var(--blue-accent))]/40 shadow-sm mr-4",
               !imageLoaded && "image-loading"
             )}>
               {profile.avatar ? (
@@ -131,8 +138,8 @@ const ProfileCard = ({
           </div>
           
           {profile.matchPercentage && (
-            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 border border-primary/20">
-              <span className="text-primary font-semibold neon-text">
+            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-[hsl(var(--blue-accent))]/10 border border-[hsl(var(--blue-accent))]/20">
+              <span className="text-[hsl(var(--blue-accent))] font-semibold neon-text-blue">
                 {profile.matchPercentage}%
               </span>
             </div>
@@ -185,27 +192,47 @@ const ProfileCard = ({
         
         {/* Action Buttons */}
         <div className="p-4 bg-secondary/50 flex items-center justify-between">
-          {onConnect && (
-            <Button 
-              size="sm" 
-              onClick={handleConnect}
-              className="flex-1 mr-2"
-              isLoading={isConnecting}
-            >
-              {!isConnecting && <Plus className="h-4 w-4 mr-1" />} Connect
-            </Button>
-          )}
-          
-          {onMessage && (
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={handleMessage}
-              className="flex-1"
-              isLoading={isMessaging}
-            >
-              {!isMessaging && <MessageCircle className="h-4 w-4 mr-1" />} Message
-            </Button>
+          {user?.id !== profile.id && (
+            <>
+              {isConnected ? (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1 mr-2 text-[hsl(var(--blue-accent))]"
+                  disabled
+                >
+                  <Check className="h-4 w-4 mr-1" /> Connected
+                </Button>
+              ) : isPending ? (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1 mr-2 text-[hsl(var(--blue-accent))]"
+                  disabled
+                >
+                  <Loader2 className="h-4 w-4 mr-1 animate-spin" /> Pending
+                </Button>
+              ) : (
+                <Button 
+                  size="sm" 
+                  onClick={handleConnect}
+                  className="flex-1 mr-2 bg-[hsl(var(--blue-accent))]"
+                  isLoading={isConnecting}
+                >
+                  {!isConnecting && <Plus className="h-4 w-4 mr-1" />} Connect
+                </Button>
+              )}
+              
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleMessage}
+                className="flex-1 border-[hsl(var(--blue-accent))]/20 hover:bg-[hsl(var(--blue-accent))]/10"
+                isLoading={isMessaging}
+              >
+                {!isMessaging && <MessageCircle className="h-4 w-4 mr-1" />} Message
+              </Button>
+            </>
           )}
           
           {variant === "full" && (

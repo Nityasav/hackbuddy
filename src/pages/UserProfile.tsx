@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { useUser } from "@/context/UserContext";
+import { useMessaging } from "@/context/MessagingContext";
 import SkillCard from "@/components/SkillCard";
 import Button from "@/components/Button";
 import { Loader2, User, Github, Linkedin, Globe, Mail, MessageCircle, Plus, ArrowLeft, Check, X } from "lucide-react";
@@ -10,11 +11,11 @@ import { toast } from "sonner";
 
 const UserProfile = () => {
   const { userId } = useParams<{ userId: string }>();
-  const { getUserById, user: currentUser, sendConnectionRequest, sendMessage, connections, pendingConnections } = useUser();
+  const { getUserById, user: currentUser, sendConnectionRequest, connections, pendingConnections } = useUser();
+  const { openChat } = useMessaging();
   const [profile, setProfile] = useState(userId ? getUserById(userId) : null);
   const [isLoading, setIsLoading] = useState(true);
   const [isConnecting, setIsConnecting] = useState(false);
-  const [isMessaging, setIsMessaging] = useState(false);
   const navigate = useNavigate();
   
   // Check connection status
@@ -64,18 +65,11 @@ const UserProfile = () => {
     }
   };
   
-  const handleMessage = async () => {
+  const handleMessage = () => {
     if (!userId || !profile || !currentUser) return;
     
-    try {
-      setIsMessaging(true);
-      await sendMessage(userId, `Hi ${profile.name}, I'd like to connect with you!`);
-      toast.success(`Message sent to ${profile.name}`);
-    } catch (error) {
-      console.error("Error messaging:", error);
-    } finally {
-      setIsMessaging(false);
-    }
+    // Open chat popup
+    openChat(profile);
   };
   
   const handleGoBack = () => {
@@ -88,7 +82,7 @@ const UserProfile = () => {
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <Loader2 className="animate-spin h-12 w-12 text-primary mx-auto mb-4" />
+            <Loader2 className="animate-spin h-12 w-12 text-[hsl(var(--blue-accent))] mx-auto mb-4" />
             <p className="text-lg">Loading profile...</p>
           </div>
         </div>
@@ -123,7 +117,7 @@ const UserProfile = () => {
           {/* Back Button */}
           <button 
             onClick={handleGoBack}
-            className="mb-6 flex items-center text-foreground/70 hover:text-primary transition-colors"
+            className="mb-6 flex items-center text-foreground/70 hover:text-[hsl(var(--blue-accent))] transition-colors"
           >
             <ArrowLeft className="h-4 w-4 mr-1" />
             Back
@@ -134,7 +128,7 @@ const UserProfile = () => {
             <div className="p-8 md:p-10 border-b border-border">
               <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                 {/* Avatar */}
-                <div className="h-32 w-32 rounded-xl overflow-hidden border-2 border-primary/40 shadow-lg">
+                <div className="h-32 w-32 rounded-xl overflow-hidden border-2 border-[hsl(var(--blue-accent))]/40 shadow-lg">
                   {profile.avatar ? (
                     <img
                       src={profile.avatar}
@@ -153,7 +147,7 @@ const UserProfile = () => {
                   <div className="flex flex-col md:flex-row md:items-center gap-2 mb-2">
                     <h1 className="text-3xl font-bold">{profile.name}</h1>
                     {profile.matchPercentage && (
-                      <span className="inline-flex items-center justify-center px-3 py-1 text-sm rounded-full bg-primary/10 border border-primary/20 text-primary neon-text">
+                      <span className="inline-flex items-center justify-center px-3 py-1 text-sm rounded-full bg-[hsl(var(--blue-accent))]/10 border border-[hsl(var(--blue-accent))]/20 text-[hsl(var(--blue-accent))] neon-text-blue">
                         {profile.matchPercentage}% Match
                       </span>
                     )}
@@ -165,34 +159,35 @@ const UserProfile = () => {
                   
                   {/* Actions */}
                   <div className="flex flex-wrap gap-3">
-                    {isConnected ? (
-                      <Button variant="outline" disabled className="flex items-center">
-                        <Check className="h-4 w-4 mr-1" /> Connected
-                      </Button>
-                    ) : isPending ? (
-                      <Button variant="outline" disabled className="flex items-center">
-                        <Loader2 className="h-4 w-4 mr-1 animate-spin" /> Pending
-                      </Button>
-                    ) : (
-                      <Button 
-                        onClick={handleConnect}
-                        isLoading={isConnecting}
-                        className="flex items-center"
-                        disabled={currentUser?.id === profile.id}
-                      >
-                        {!isConnecting && <Plus className="h-4 w-4 mr-1" />} Connect
-                      </Button>
+                    {currentUser?.id !== profile.id && (
+                      <>
+                        {isConnected ? (
+                          <Button variant="outline" disabled className="flex items-center text-[hsl(var(--blue-accent))]">
+                            <Check className="h-4 w-4 mr-1" /> Connected
+                          </Button>
+                        ) : isPending ? (
+                          <Button variant="outline" disabled className="flex items-center">
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" /> Pending
+                          </Button>
+                        ) : (
+                          <Button 
+                            onClick={handleConnect}
+                            isLoading={isConnecting}
+                            className="flex items-center bg-[hsl(var(--blue-accent))]"
+                          >
+                            {!isConnecting && <Plus className="h-4 w-4 mr-1" />} Connect
+                          </Button>
+                        )}
+                        
+                        <Button 
+                          variant="outline" 
+                          onClick={handleMessage}
+                          className="flex items-center border-[hsl(var(--blue-accent))]/20 hover:bg-[hsl(var(--blue-accent))]/10"
+                        >
+                          <MessageCircle className="h-4 w-4 mr-1" /> Message
+                        </Button>
+                      </>
                     )}
-                    
-                    <Button 
-                      variant="outline" 
-                      onClick={handleMessage}
-                      isLoading={isMessaging}
-                      className="flex items-center"
-                      disabled={currentUser?.id === profile.id}
-                    >
-                      {!isMessaging && <MessageCircle className="h-4 w-4 mr-1" />} Message
-                    </Button>
                     
                     <a 
                       href={`mailto:${profile.email}`}
@@ -208,7 +203,7 @@ const UserProfile = () => {
             <div className="grid md:grid-cols-2 gap-8 p-8 md:p-10">
               {/* Skills */}
               <div>
-                <h2 className="text-xl font-semibold mb-4 neon-text">Skills</h2>
+                <h2 className="text-xl font-semibold mb-4 neon-text-blue">Skills</h2>
                 
                 <div className="flex flex-wrap gap-2 mb-6">
                   {profile.skills.map((skill) => (
