@@ -2,8 +2,9 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Use environment variables in a production environment
-const supabaseUrl = 'https://your-supabase-url.supabase.co';
-const supabaseAnonKey = 'your-supabase-anon-key';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE.URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Define database types
 export type Profile = {
