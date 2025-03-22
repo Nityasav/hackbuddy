@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
-import ProfileForm, { ProfileFormData } from "@/components/ProfileForm";
+import { ProfileForm, ProfileFormData } from "@/components/profile";
 import { useUser } from "@/context/UserContext";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
