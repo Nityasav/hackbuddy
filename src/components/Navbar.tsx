@@ -34,8 +34,7 @@ const Navbar = () => {
 
   const navigation = [
     { name: "Home", href: "/" },
-    { name: "Dashboard", href: "/dashboard" },
-    { name: "Matches", href: "/matches" },
+    { name: "Connections", href: "/connections" },
     { name: "Profile", href: "/profile" },
     { name: "AI Agent", href: "/ai-agent" }
   ];

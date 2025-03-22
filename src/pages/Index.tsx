@@ -15,7 +15,7 @@ const Index = () => {
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">How Team Finder Works</h2>
               <p className="text-lg text-foreground/70 max-w-2xl mx-auto">
-                Our platform makes it easy to find the perfect teammates for your next hackathon project
+                Ourimage.png platform makes it easy to find the perfect teammates for your next hackathon project
               </p>
             </div>
             

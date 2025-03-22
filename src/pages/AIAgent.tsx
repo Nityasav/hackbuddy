@@ -62,7 +62,7 @@ const AIAgent = () => {
                   <Button 
                     variant="outline" 
                     size="lg"
-                    className="flex items-center gap-2 neon-box-blue text-[hsl(var(--blue-accent))] hover-lift"
+                    className="flex items-center gap-2 neon-box-blue text-white hover-lift"
                     onClick={() => setShowPrompt(!showPrompt)}
                   >
                     <MessageSquare className="h-5 w-5" />
@@ -82,8 +82,8 @@ const AIAgent = () => {
                 <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                   <Headphones className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-primary">1. Interview</h3>
-                <p className="text-foreground/70">Our AI agent conducts a brief interview to understand your skills, experience, and hackathon goals.</p>
+                <h3 className="text-xl font-semibold mb-3 text-primary">1. Voice Interview</h3>
+                <p className="text-foreground/70">Our AI agent uses Vapi API to conduct a voice-based interview about your skills, experience, and hackathon goals.</p>
               </div>
               
               <div className="glass-card p-6 rounded-xl hover-lift">
@@ -98,9 +98,26 @@ const AIAgent = () => {
                 <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                   <MailCheck className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-primary">3. Matching</h3>
+                <h3 className="text-xl font-semibold mb-3 text-primary">3. Team Matching</h3>
                 <p className="text-foreground/70">Our algorithm matches you with potential teammates who complement your skills and share similar project interests.</p>
               </div>
+            </div>
+          </div>
+
+          {/* Tech Stack Section */}
+          <div className="glass-card rounded-xl p-6 mb-10 animate-fade-up">
+            <h2 className="text-2xl font-bold mb-4 text-white neon-text-blue">Our Technology</h2>
+            <div className="text-white/90 mb-6">
+              <p className="mb-4">
+                HackBuddy leverages powerful technology to create the perfect hackathon team matching experience:
+              </p>
+              
+              <ul className="space-y-3 ml-6 list-disc">
+                <li><strong className="text-primary">Vapi API Integration</strong> - Voice-based AI interaction that conducts natural conversations to learn about your skills and preferences</li>
+                <li><strong className="text-primary">Secure Database</strong> - Safely stores participant profiles and manages connection requests</li>
+                <li><strong className="text-primary">Matching Algorithm</strong> - Identifies complementary skill sets and shared interests to form balanced teams</li>
+                <li><strong className="text-primary">B2B & B2C Features</strong> - Solutions for both hackathon organizers and individual participants</li>
+              </ul>
             </div>
           </div>
 

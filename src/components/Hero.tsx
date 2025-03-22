@@ -1,4 +1,3 @@
-
 import { ArrowRight, Code, Users, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import Button from "./Button";
@@ -25,19 +24,10 @@ const Hero = () => {
             Connect with the <span className="text-primary">perfect teammates</span> for your next hackathon
           </h1>
           
-          <p className="text-lg md:text-xl text-foreground/70 mb-10 max-w-3xl mx-auto animate-slide-in animate-delay-100">
-            Our AI-powered platform matches you with complementary teammates based on skills, experience, and project interests, helping you build the ideal team for hackathon success.
-          </p>
-          
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in animate-delay-200">
             <Link to="/profile">
               <Button size="lg" className="w-full sm:w-auto">
                 Create Your Profile <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-            <Link to="/matches">
-              <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                Browse Potential Matches
               </Button>
             </Link>
           </div>
