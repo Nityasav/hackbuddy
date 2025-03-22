@@ -1,69 +1,179 @@
-# Welcome to your Lovable project
 
-## Project info
+# HackBuddy - AI-Powered Hackathon Team Matching
 
-**URL**: https://lovable.dev/projects/0d88efc1-1bef-4986-9593-1557e7596264
+HackBuddy is an innovative platform designed to solve one of the biggest challenges in hackathons: finding the perfect team. Our AI-powered system matches participants based on complementary skills, experience levels, and project interests.
 
-## How can I edit this code?
+## Supabase Setup Instructions
 
-There are several ways of editing your application.
+### Step 1: Create a Supabase Project
 
-**Use Lovable**
+1. Sign up for a free Supabase account at [https://supabase.com](https://supabase.com)
+2. Create a new project and note your project URL and anon/public key
+3. Update the `supabaseUrl` and `supabaseAnonKey` in `src/lib/supabase.ts`
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/0d88efc1-1bef-4986-9593-1557e7596264) and start prompting.
+### Step 2: Set Up Database Tables
 
-Changes made via Lovable will be committed automatically to this repo.
+Execute the following SQL in the Supabase SQL Editor to create the required tables:
 
-**Use your preferred IDE**
+```sql
+-- Create profiles table
+CREATE TABLE public.profiles (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  user_id UUID REFERENCES auth.users NOT NULL,
+  name TEXT,
+  bio TEXT,
+  avatar_url TEXT,
+  skills TEXT[] DEFAULT '{}',
+  experience_level TEXT,
+  looking_for TEXT[] DEFAULT '{}',
+  project_interests TEXT[] DEFAULT '{}',
+  contact_email TEXT,
+  github_url TEXT,
+  linkedin_url TEXT,
+  UNIQUE (user_id)
+);
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+-- Create connections table
+CREATE TABLE public.connections (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  requester_id UUID REFERENCES auth.users NOT NULL,
+  recipient_id UUID REFERENCES auth.users NOT NULL,
+  status TEXT CHECK (status IN ('pending', 'accepted', 'rejected')) DEFAULT 'pending',
+  message TEXT
+);
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+-- Create messages table
+CREATE TABLE public.messages (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  sender_id UUID REFERENCES auth.users NOT NULL,
+  recipient_id UUID REFERENCES auth.users NOT NULL,
+  content TEXT NOT NULL,
+  read BOOLEAN DEFAULT FALSE
+);
 
-Follow these steps:
+-- Create team_matches table
+CREATE TABLE public.team_matches (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  title TEXT NOT NULL,
+  description TEXT,
+  match_percentage INTEGER CHECK (match_percentage BETWEEN 0 AND 100),
+  user_ids UUID[] NOT NULL
+);
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+-- Create agent_calls table
+CREATE TABLE public.agent_calls (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  user_id UUID REFERENCES auth.users NOT NULL,
+  call_duration INTEGER DEFAULT 0,
+  call_summary TEXT,
+  call_recording_url TEXT,
+  updated_profile_data JSONB
+);
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+-- Set up RLS policies
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.connections ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.team_matches ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.agent_calls ENABLE ROW LEVEL SECURITY;
 
-# Step 3: Install the necessary dependencies.
-npm i
+-- Profiles table policies
+CREATE POLICY "Public profiles are viewable by everyone"
+ON public.profiles FOR SELECT USING (true);
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+CREATE POLICY "Users can insert their own profile"
+ON public.profiles FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own profile"
+ON public.profiles FOR UPDATE USING (auth.uid() = user_id);
+
+-- Connections table policies
+CREATE POLICY "Connections are viewable by involved users"
+ON public.connections FOR SELECT USING (
+  auth.uid() = requester_id OR auth.uid() = recipient_id
+);
+
+CREATE POLICY "Users can insert their own connection requests"
+ON public.connections FOR INSERT WITH CHECK (auth.uid() = requester_id);
+
+CREATE POLICY "Users can update connections they're involved in"
+ON public.connections FOR UPDATE USING (
+  auth.uid() = requester_id OR auth.uid() = recipient_id
+);
+
+-- Messages table policies
+CREATE POLICY "Messages are viewable by involved users"
+ON public.messages FOR SELECT USING (
+  auth.uid() = sender_id OR auth.uid() = recipient_id
+);
+
+CREATE POLICY "Users can insert their own messages"
+ON public.messages FOR INSERT WITH CHECK (auth.uid() = sender_id);
+
+CREATE POLICY "Users can update messages they sent"
+ON public.messages FOR UPDATE USING (auth.uid() = sender_id);
+
+-- Team matches table policies
+CREATE POLICY "Team matches are viewable by involved users"
+ON public.team_matches FOR SELECT USING (
+  auth.uid() = ANY(user_ids)
+);
+
+-- Agent calls table policies
+CREATE POLICY "Agent calls are viewable by the user"
+ON public.agent_calls FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own agent calls"
+ON public.agent_calls FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Create a trigger to create a profile when a user signs up
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (user_id, name, contact_email)
+  VALUES (NEW.id, NEW.email, NEW.email);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
 ```
 
-**Edit a file directly in GitHub**
+### Step 3: Configure Authentication
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. In Supabase Dashboard, go to Authentication → Settings
+2. Set up your Site URL and any redirect URLs
+3. Configure Email templates for auth emails
 
-**Use GitHub Codespaces**
+### Step 4: Set Up Storage
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+1. In Supabase Dashboard, go to Storage
+2. Create a new bucket called "avatars" for profile pictures
+3. Set up appropriate bucket policies
 
-## What technologies are used for this project?
+## Integrating with Voice API
 
-This project is built with .
+For the AI agent voice calling functionality, you'll need to set up:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. Register for a Vapi API account
+2. Create an .env file with your Vapi API key
+3. Implement the voice agent functionality using their SDK
 
-## How can I deploy this project?
+## Running the Project
 
-Simply open [Lovable](https://lovable.dev/projects/0d88efc1-1bef-4986-9593-1557e7596264) and click on Share -> Publish.
+1. Install dependencies:
+```bash
+npm install
+```
 
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+2. Start the development server:
+```bash
+npm run dev
+```

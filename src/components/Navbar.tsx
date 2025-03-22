@@ -37,7 +37,8 @@ const Navbar = () => {
     { name: "Home", href: "/" },
     { name: "Dashboard", href: "/dashboard" },
     { name: "Matches", href: "/matches" },
-    { name: "Profile", href: "/profile" }
+    { name: "Profile", href: "/profile" },
+    { name: "AI Agent", href: "/ai-agent" }
   ];
 
   return (
@@ -53,21 +54,28 @@ const Navbar = () => {
           to="/" 
           className="text-xl font-bold tracking-tight flex items-center"
         >
+          <img 
+            src="/lovable-uploads/c58de648-bd38-4a4d-9139-f4f2087d30de.png" 
+            alt="HackBuddy Logo" 
+            className="h-8 w-8 mr-2 neon-glow" 
+          />
           <span className="text-primary neon-text">Hack</span>
-          <span>Buddy</span>
+          <span className="text-[hsl(var(--blue-accent))] neon-text-blue">Buddy</span>
         </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-1">
-          {navigation.map((item) => (
+          {navigation.map((item, index) => (
             <Link
               key={item.name}
               to={item.href}
               className={cn(
                 "px-3 py-2 rounded-md text-sm font-medium transition-colors",
                 location.pathname === item.href
-                  ? "text-primary neon-text"
-                  : "text-foreground/80 hover:text-primary hover:bg-secondary/50"
+                  ? index % 2 === 0 
+                    ? "text-primary neon-text" 
+                    : "text-[hsl(var(--blue-accent))] neon-text-blue"
+                  : "text-[hsl(var(--blue-accent))]/90 hover:text-[hsl(var(--blue-accent))] hover:bg-secondary/50"
               )}
             >
               {item.name}
@@ -80,7 +88,7 @@ const Navbar = () => {
           {isAuthenticated ? (
             <>
               <Link to="/profile">
-                <Button variant="ghost" size="sm" className="flex items-center">
+                <Button variant="ghost" size="sm" className="flex items-center text-[hsl(var(--blue-accent))]">
                   <User className="h-4 w-4 mr-1" />
                   Profile
                 </Button>
@@ -88,7 +96,7 @@ const Navbar = () => {
               <Button 
                 size="sm" 
                 variant="outline"
-                className="flex items-center"
+                className="flex items-center neon-box-blue text-[hsl(var(--blue-accent))]"
                 onClick={handleLogout}
               >
                 <LogOut className="h-4 w-4 mr-1" />
@@ -104,7 +112,7 @@ const Navbar = () => {
                 </Button>
               </Link>
               <Link to="/register">
-                <Button size="sm" variant="outline" className="flex items-center">
+                <Button size="sm" variant="outline" className="flex items-center neon-box-blue text-[hsl(var(--blue-accent))]">
                   <User className="h-4 w-4 mr-1" />
                   Register
                 </Button>
@@ -119,9 +127,9 @@ const Navbar = () => {
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           {isMobileMenuOpen ? (
-            <X className="h-6 w-6" />
+            <X className="h-6 w-6 text-[hsl(var(--blue-accent))]" />
           ) : (
-            <Menu className="h-6 w-6" />
+            <Menu className="h-6 w-6 text-[hsl(var(--blue-accent))]" />
           )}
         </button>
       </div>
@@ -134,15 +142,17 @@ const Navbar = () => {
         )}
       >
         <div className="px-2 pt-2 pb-3 space-y-1">
-          {navigation.map((item) => (
+          {navigation.map((item, index) => (
             <Link
               key={item.name}
               to={item.href}
               className={cn(
                 "block px-3 py-2 rounded-md text-base font-medium transition-colors",
                 location.pathname === item.href
-                  ? "text-primary neon-text"
-                  : "text-foreground/80 hover:text-primary hover:bg-secondary/50"
+                  ? index % 2 === 0 
+                    ? "text-primary neon-text" 
+                    : "text-[hsl(var(--blue-accent))] neon-text-blue"
+                  : "text-[hsl(var(--blue-accent))]/90 hover:text-[hsl(var(--blue-accent))] hover:bg-secondary/50"
               )}
             >
               {item.name}
@@ -158,7 +168,7 @@ const Navbar = () => {
                 <Button 
                   size="sm" 
                   variant="outline"
-                  className="w-full flex items-center justify-center"
+                  className="w-full flex items-center justify-center neon-box-blue text-[hsl(var(--blue-accent))]"
                 >
                   <LogOut className="h-4 w-4 mr-1" />
                   Sign Out
@@ -177,7 +187,7 @@ const Navbar = () => {
                 <Button 
                   size="sm" 
                   variant="outline"
-                  className="w-full flex items-center justify-center"
+                  className="w-full flex items-center justify-center neon-box-blue text-[hsl(var(--blue-accent))]"
                 >
                   <User className="h-4 w-4 mr-1" />
                   Register

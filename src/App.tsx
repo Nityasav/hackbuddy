@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import UserProfile from "./pages/UserProfile";
+import AIAgent from "./pages/AIAgent";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/user/:userId" element={<UserProfile />} />
+              <Route path="/ai-agent" element={<AIAgent />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

@@ -7,7 +7,7 @@ import Button from "@/components/Button";
 import { UserProfile } from "@/components/ProfileCard";
 import ConnectionRequests from "@/components/connections/ConnectionRequests";
 import { useMessaging } from "@/context/MessagingContext";
-import { ChevronRight, Loader2, Users } from "lucide-react";
+import { ChevronRight, Loader2, Users, Bot, PhoneCall } from "lucide-react";
 
 const Dashboard = () => {
   const { user, isLoading, getUserById } = useUser();
@@ -46,7 +46,7 @@ const Dashboard = () => {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <Loader2 className="animate-spin h-12 w-12 text-[hsl(var(--blue-accent))] mx-auto mb-4" />
-            <p className="text-lg">Loading dashboard...</p>
+            <p className="text-lg text-[hsl(var(--blue-accent))]/90">Loading dashboard...</p>
           </div>
         </div>
       </div>
@@ -59,7 +59,7 @@ const Dashboard = () => {
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center max-w-md px-4">
-            <h2 className="text-2xl font-bold mb-4 neon-text-blue">Sign in to view your dashboard</h2>
+            <h2 className="text-2xl font-bold mb-4 text-[hsl(var(--blue-accent))] neon-text-blue">Sign in to view your dashboard</h2>
             <p className="text-foreground/70 mb-6">
               You need to sign in or create an account to access your personal dashboard.
             </p>
@@ -68,7 +68,7 @@ const Dashboard = () => {
                 <Button>Sign In</Button>
               </Link>
               <Link to="/register">
-                <Button variant="outline" className="neon-box-blue">Create Profile</Button>
+                <Button variant="outline" className="neon-box-blue text-[hsl(var(--blue-accent))]">Create Profile</Button>
               </Link>
             </div>
           </div>
@@ -83,10 +83,31 @@ const Dashboard = () => {
       <main className="flex-1 pt-24 pb-16">
         <div className="container px-4 mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold mb-3 neon-text-blue">Your Dashboard</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-3">
+              Your <span className="text-[hsl(var(--blue-accent))] neon-text-blue">Dashboard</span>
+            </h1>
             <p className="text-foreground/70">
-              Welcome back, {user.name}! Here's an overview of your connections and team matches.
+              Welcome back, <span className="text-[hsl(var(--blue-accent))]">{user.name}</span>! Here's an overview of your connections and team matches.
             </p>
+          </div>
+          
+          {/* AI Agent Banner */}
+          <div className="glass-card rounded-xl p-5 mb-8 border border-[hsl(var(--blue-accent))]/20">
+            <div className="flex flex-col md:flex-row items-center gap-4">
+              <div className="h-16 w-16 rounded-full bg-[hsl(var(--blue-accent))]/10 flex items-center justify-center">
+                <Bot className="h-8 w-8 text-[hsl(var(--blue-accent))]" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-semibold text-[hsl(var(--blue-accent))] neon-text-blue">AI Matching Agent</h3>
+                <p className="text-foreground/70 mb-2">Talk to our AI agent to find your perfect hackathon team match.</p>
+              </div>
+              <Link to="/ai-agent">
+                <Button variant="outline" className="flex items-center gap-2 neon-box-blue text-[hsl(var(--blue-accent))]">
+                  <PhoneCall className="h-4 w-4" />
+                  Connect with Agent
+                </Button>
+              </Link>
+            </div>
           </div>
           
           {/* Connection Requests */}
@@ -95,7 +116,7 @@ const Dashboard = () => {
           {/* Team Recommendations */}
           <div className="mb-10">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold neon-text">Team Recommendations</h2>
+              <h2 className="text-2xl font-bold text-[hsl(var(--blue-accent))] neon-text-blue">Team Recommendations</h2>
               <Link 
                 to="/matches"
                 className="text-[hsl(var(--blue-accent))] hover:text-[hsl(var(--blue-accent))]/80 flex items-center text-sm font-medium"
@@ -126,25 +147,25 @@ const Dashboard = () => {
             </p>
             
             <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-secondary/30 rounded-lg p-4 border border-border">
+              <div className="bg-secondary/30 rounded-lg p-4 border border-[hsl(var(--blue-accent))]/20">
                 <h3 className="text-lg font-medium mb-2 text-[hsl(var(--blue-accent))]">Update Skills</h3>
                 <p className="text-sm text-foreground/70 mb-4">
                   Add all your technical and soft skills to help us find better matches.
                 </p>
                 <Link to="/profile">
-                  <Button variant="outline" size="sm" className="w-full neon-box-blue">
+                  <Button variant="outline" size="sm" className="w-full neon-box-blue text-[hsl(var(--blue-accent))]">
                     Update Skills
                   </Button>
                 </Link>
               </div>
               
               <div className="bg-secondary/30 rounded-lg p-4 border border-border">
-                <h3 className="text-lg font-medium mb-2 text-[hsl(var(--blue-accent))]">Find Teammates</h3>
+                <h3 className="text-lg font-medium mb-2 text-primary">Find Teammates</h3>
                 <p className="text-sm text-foreground/70 mb-4">
                   Browse potential teammates and connect with those who match your interests.
                 </p>
                 <Link to="/matches">
-                  <Button variant="outline" size="sm" className="w-full neon-box-blue">
+                  <Button variant="outline" size="sm" className="w-full neon-box">
                     Find Teammates
                   </Button>
                 </Link>
