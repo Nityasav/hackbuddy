@@ -169,15 +169,15 @@
 
 /* Advanced blur effects for cards */
 .frosted-glass {
-  @apply relative overflow-hidden;
+  @apply relative overflow-hidden rounded-lg;
 }
 
 .frosted-glass::before {
   content: '';
-  @apply absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 rounded-inherit backdrop-blur-xl z-[-1];
+  @apply absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 rounded-lg backdrop-blur-xl z-[-1];
 }
 
 .frosted-glass::after {
   content: '';
-  @apply absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 rounded-inherit z-[-2];
+  @apply absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg z-[-2];
 }
