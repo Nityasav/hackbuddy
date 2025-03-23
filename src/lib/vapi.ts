@@ -12,6 +12,10 @@ export const initiateCall = async (phoneNumber: string) => {
     const twilioAccountSid = import.meta.env.VITE_TWILIO_ACCOUNT_SID;
     const twilioAuthToken = import.meta.env.VITE_TWILIO_AUTH_TOKEN;
     const twilioPhoneNumber = import.meta.env.VITE_TWILIO_PHONE_NUMBER;
+    
+    // Use your new assistant ID - bypass any environment variables or caching
+    // Replace this with the EXACT ID from your Vapi dashboard for the assistant that works
+    const NEW_ASSISTANT_ID = "374ae831-c7bd-44f5-abc6-10daf6f71125"; // Replace with your working assistant ID
 
     if (!apiKey) {
       console.error('Vapi API key is not set in environment variables');
@@ -26,6 +30,20 @@ export const initiateCall = async (phoneNumber: string) => {
     // Log the request details for debugging
     console.log('Initiating call with phone number:', formattedPhoneNumber);
     console.log('Using API key:', apiKey.substring(0, 4) + '...');
+    console.log('Using assistant ID:', NEW_ASSISTANT_ID);
+    
+    // More detailed logging for debugging
+    console.log('Full request configuration:');
+    console.log(JSON.stringify({
+      assistantId: NEW_ASSISTANT_ID,
+      phoneNumber: {
+        twilioPhoneNumber,
+        name: 'Team Finder Call'
+      },
+      customer: {
+        number: formattedPhoneNumber
+      }
+    }, null, 2));
     
     // Create a new call using Vapi
     const response = await fetch('https://api.vapi.ai/call', {
@@ -35,40 +53,25 @@ export const initiateCall = async (phoneNumber: string) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        assistantId: NEW_ASSISTANT_ID,
         phoneNumber: {
           twilioAccountSid,
           twilioAuthToken,
           twilioPhoneNumber,
-          name: 'Team Finder Call',
-          assistantId: import.meta.env.VITE_VAPI_ASSISTANT_ID,
-          server: {
-            url: import.meta.env.VITE_SERVER_URL,
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          }
+          name: 'Team Finder Call'
         },
         customer: {
           number: formattedPhoneNumber,
           name: 'Team Finder Customer',
           numberE164CheckEnabled: true
-        },
-        assistant: {
-          name: 'Team Finder Agent',
-          model: {
-            provider: 'openai',
-            model: 'gpt-4-turbo-preview',
-          },
-          voice: {
-            provider: 'azure',
-            voiceId: 'en-US-JennyNeural',
-          },
-          firstMessage: 'Hello! I\'m your Team Finder agent. I\'ll be conducting a brief interview to help match you with the perfect teammates for your next hackathon. Are you ready to begin?'
         }
       })
     });
 
     const data = await response.json();
+    
+    // Log the entire response for debugging
+    console.log('Full Vapi response:', JSON.stringify(data, null, 2));
 
     if (!response.ok) {
       console.error('Vapi API Error Response:', {
