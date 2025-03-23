@@ -41,7 +41,7 @@ const mockConnections: Connection[] = [
   },
   {
     id: "conn2",
-    created_at: new Date(Date.now() - 86400000).toISOString(),
+    created_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
     requester_id: "user3",
     recipient_id: "user1",
     status: "accepted",
@@ -50,6 +50,110 @@ const mockConnections: Connection[] = [
       avatar_url: "https://randomuser.me/api/portraits/women/62.jpg",
       skills: ["Python", "Machine Learning", "Data Visualization"],
       email: "taylor@example.com"
+    }
+  },
+  {
+    id: "conn3",
+    created_at: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+    requester_id: "user4",
+    recipient_id: "user1",
+    status: "pending",
+    profile: {
+      name: "Alex Johnson",
+      avatar_url: "https://randomuser.me/api/portraits/men/44.jpg",
+      skills: ["React", "TypeScript", "Next.js", "UI/UX"],
+      email: "alex.j@example.com"
+    }
+  },
+  {
+    id: "conn4",
+    created_at: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
+    requester_id: "user1",
+    recipient_id: "user5",
+    status: "rejected",
+    profile: {
+      name: "Samantha Lee",
+      avatar_url: "https://randomuser.me/api/portraits/women/33.jpg",
+      skills: ["Product Management", "Scrum", "Market Research"],
+      email: "samantha.lee@example.com"
+    }
+  },
+  {
+    id: "conn5",
+    created_at: new Date(Date.now() - 345600000).toISOString(), // 4 days ago
+    requester_id: "user6",
+    recipient_id: "user1",
+    status: "accepted",
+    profile: {
+      name: "David Chen",
+      avatar_url: "https://randomuser.me/api/portraits/men/78.jpg",
+      skills: ["Node.js", "Express", "MongoDB", "AWS"],
+      email: "david.chen@example.com"
+    }
+  },
+  {
+    id: "conn6",
+    created_at: new Date(Date.now() - 432000000).toISOString(), // 5 days ago
+    requester_id: "user7",
+    recipient_id: "user1",
+    status: "rejected",
+    profile: {
+      name: "Emily Rodriguez",
+      avatar_url: "https://randomuser.me/api/portraits/women/17.jpg",
+      skills: ["C++", "Game Development", "Unity", "3D Modeling"],
+      email: "emily.r@example.com"
+    }
+  },
+  {
+    id: "conn7",
+    created_at: new Date(Date.now() - 518400000).toISOString(), // 6 days ago
+    requester_id: "user1",
+    recipient_id: "user8",
+    status: "accepted",
+    profile: {
+      name: "Michael Thompson",
+      avatar_url: "https://randomuser.me/api/portraits/men/22.jpg",
+      skills: ["Flutter", "Dart", "Mobile Development", "Firebase"],
+      email: "michael.t@example.com"
+    }
+  },
+  {
+    id: "conn8",
+    created_at: new Date(Date.now() - 604800000).toISOString(), // 7 days ago
+    requester_id: "user9",
+    recipient_id: "user1",
+    status: "pending",
+    profile: {
+      name: "Olivia Wilson",
+      avatar_url: "https://randomuser.me/api/portraits/women/28.jpg",
+      skills: ["Data Science", "R", "Statistics", "Tableau"],
+      email: "olivia.w@example.com"
+    }
+  },
+  {
+    id: "conn9",
+    created_at: new Date(Date.now() - 691200000).toISOString(), // 8 days ago
+    requester_id: "user10",
+    recipient_id: "user1",
+    status: "pending",
+    profile: {
+      name: "James Kim",
+      avatar_url: "https://randomuser.me/api/portraits/men/55.jpg",
+      skills: ["Blockchain", "Solidity", "Smart Contracts", "Web3"],
+      email: "james.kim@example.com"
+    }
+  },
+  {
+    id: "conn10",
+    created_at: new Date(Date.now() - 777600000).toISOString(), // 9 days ago
+    requester_id: "user1",
+    recipient_id: "user11",
+    status: "accepted",
+    profile: {
+      name: "Sophia Garcia",
+      avatar_url: "https://randomuser.me/api/portraits/women/90.jpg",
+      skills: ["DevOps", "Kubernetes", "Docker", "CI/CD"],
+      email: "sophia.g@example.com"
     }
   }
 ];
@@ -60,7 +164,7 @@ const Connections = () => {
   const { toast } = useToast();
   const [connections, setConnections] = useState<Connection[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'accepted'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'accepted' | 'rejected'>('all');
   const [usesMockData, setUsesMockData] = useState(false);
 
   // Redirect to login if not authenticated
@@ -260,13 +364,48 @@ const Connections = () => {
 
   // Navigate to profile page
   const handleViewProfile = (connectionId: string, userId: string) => {
-    // For mock data, check if we have requester_id starting with "user"
-    if (userId.startsWith("user")) {
-      // Extract the user number from the ID (e.g., "user2" -> "2")
-      const userNumber = userId.replace("user", "");
-      navigate(`/user/user${userNumber}`);
+    // Find the connection by ID
+    const connection = connections.find(conn => conn.id === connectionId);
+    
+    if (!connection) return;
+    
+    // For mock data, map each connection to a unique profile URL
+    if (usesMockData) {
+      // Get the profile name to determine the correct URL
+      const name = connection.profile?.name || "";
+      
+      // Map specific names to specific profile URLs
+      if (name.includes("Jordan")) {
+        navigate("/user/jordan");
+      } else if (name.includes("Taylor")) {
+        navigate("/user/taylor");
+      } else if (name.includes("Alex")) {
+        navigate("/user/alex");
+      } else if (name.includes("Emily")) {
+        navigate("/user/emily");
+      } else if (name.includes("Michael")) {
+        navigate("/user/michael");
+      } else if (name.includes("Olivia")) {
+        navigate("/user/olivia");
+      } else if (name.includes("James")) {
+        navigate("/user/james");
+      } else if (name.includes("Sophia")) {
+        navigate("/user/sophia");
+      } else if (name.includes("Casey")) {
+        navigate("/user/casey");
+      } else if (name.includes("Robin")) {
+        navigate("/user/robin");
+      } else if (name.includes("Samantha")) {
+        navigate("/user/samantha");
+      } else if (name.includes("David")) {
+        navigate("/user/david");
+      } else {
+        // Extract user number from the userId as fallback
+        const userNumber = userId.replace("user", "");
+        navigate(`/user/user${userNumber}`);
+      }
     } else {
-      // For Supabase data, use the actual ID
+      // For actual Supabase data, use the actual ID
       navigate(`/user/${userId}`);
     }
   };
@@ -299,8 +438,59 @@ const Connections = () => {
             </div>
           </div>
 
+          {/* Connection Stats */}
+          {!loading && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 animate-fade-up">
+              <div className="glass-card p-4 rounded-lg flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-white/60">Total</p>
+                  <p className="text-2xl font-semibold">{connections.length}</p>
+                </div>
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Users className="h-5 w-5 text-primary" />
+                </div>
+              </div>
+              
+              <div className="glass-card p-4 rounded-lg flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-yellow-400/60">Pending</p>
+                  <p className="text-2xl font-semibold text-yellow-400">
+                    {connections.filter(conn => conn.status === 'pending').length}
+                  </p>
+                </div>
+                <div className="h-10 w-10 rounded-full bg-yellow-500/10 flex items-center justify-center">
+                  <UserPlus className="h-5 w-5 text-yellow-400" />
+                </div>
+              </div>
+              
+              <div className="glass-card p-4 rounded-lg flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-green-400/60">Accepted</p>
+                  <p className="text-2xl font-semibold text-green-400">
+                    {connections.filter(conn => conn.status === 'accepted').length}
+                  </p>
+                </div>
+                <div className="h-10 w-10 rounded-full bg-green-500/10 flex items-center justify-center">
+                  <UserCheck className="h-5 w-5 text-green-400" />
+                </div>
+              </div>
+              
+              <div className="glass-card p-4 rounded-lg flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-red-400/60">Rejected</p>
+                  <p className="text-2xl font-semibold text-red-400">
+                    {connections.filter(conn => conn.status === 'rejected').length}
+                  </p>
+                </div>
+                <div className="h-10 w-10 rounded-full bg-red-500/10 flex items-center justify-center">
+                  <UserX className="h-5 w-5 text-red-400" />
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Tabs */}
-          <div className="flex border-b border-white/10 mb-6">
+          <div className="flex border-b border-white/10 mb-6 flex-wrap">
             <button
               className={cn(
                 "py-2 px-4 font-medium text-sm transition-colors relative",
@@ -348,6 +538,22 @@ const Connections = () => {
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
               )}
             </button>
+            
+            <button
+              className={cn(
+                "py-2 px-4 font-medium text-sm transition-colors relative",
+                activeTab === 'rejected' 
+                  ? "text-primary" 
+                  : "text-white/60 hover:text-white"
+              )}
+              onClick={() => setActiveTab('rejected')}
+            >
+              <UserX className="inline-block h-4 w-4 mr-1" />
+              Rejected
+              {activeTab === 'rejected' && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+              )}
+            </button>
           </div>
 
           {loading ? (
@@ -366,7 +572,9 @@ const Connections = () => {
                   ? "You haven't connected with any hackathon teams yet."
                   : activeTab === 'pending'
                     ? "You don't have any pending connection requests."
-                    : "You don't have any accepted connections yet."}
+                    : activeTab === 'accepted'
+                      ? "You don't have any accepted connections yet."
+                      : "You don't have any rejected connections."}
               </p>
               <p className="text-white/70">
                 Use the AI Agent to find suitable teammates for your next hackathon.
@@ -377,7 +585,12 @@ const Connections = () => {
               {filteredConnections.map((connection) => (
                 <div 
                   key={connection.id} 
-                  className="glass-card rounded-xl p-6 hover-lift transition-all duration-300 cursor-pointer relative group"
+                  className={cn(
+                    "glass-card rounded-xl p-6 hover-lift transition-all duration-300 cursor-pointer relative group",
+                    connection.status === 'accepted' ? "border border-green-500/30" : 
+                    connection.status === 'pending' ? "border border-yellow-500/30" : 
+                    "border border-red-500/30"
+                  )}
                   onClick={() => handleViewProfile(connection.id, connection.requester_id === user?.id ? connection.recipient_id : connection.requester_id)}
                 >
                   <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -434,18 +647,28 @@ const Connections = () => {
                   
                   {/* Status */}
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <span 
-                        className={cn(
-                          "h-2 w-2 rounded-full mr-2",
-                          connection.status === 'accepted' ? "bg-green-500" : 
-                          connection.status === 'rejected' ? "bg-red-500" : 
-                          "bg-yellow-500"
-                        )}
-                      />
-                      <span className="text-sm text-white/60 capitalize">
-                        {connection.status}
-                      </span>
+                    <div>
+                      <div className="flex items-center">
+                        <span 
+                          className={cn(
+                            "h-2 w-2 rounded-full mr-2",
+                            connection.status === 'accepted' ? "bg-green-500" : 
+                            connection.status === 'rejected' ? "bg-red-500" : 
+                            "bg-yellow-500"
+                          )}
+                        />
+                        <span className={cn(
+                          "text-sm capitalize",
+                          connection.status === 'accepted' ? "text-green-400" : 
+                          connection.status === 'rejected' ? "text-red-400" : 
+                          "text-yellow-400"
+                        )}>
+                          {connection.status}
+                        </span>
+                      </div>
+                      <div className="text-xs text-white/40 mt-1">
+                        {new Date(connection.created_at).toLocaleDateString()} · {connection.requester_id === user?.id ? 'Outgoing' : 'Incoming'}
+                      </div>
                     </div>
                     
                     {connection.status === 'pending' && connection.recipient_id === user?.id && (

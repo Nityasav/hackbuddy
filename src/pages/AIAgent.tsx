@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Button from "@/components/Button";
-import { Phone, PhoneCall, Headphones, MessageSquare, User, MailCheck } from "lucide-react";
+import { Phone, PhoneCall, Headphones, MessageSquare, User, MailCheck, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const AIAgent = () => {
@@ -121,33 +121,94 @@ const AIAgent = () => {
             </div>
           </div>
 
-          {/* Agent Prompt Section */}
+          {/* Agent Prompt Modal */}
           {showPrompt && (
-            <div className="glass-card rounded-xl p-6 mb-10 border border-white/40 animate-fade-up">
-              <h2 className="text-2xl font-bold mb-4 text-white neon-text-blue">Agent Prompt</h2>
-              <div className="bg-black/50 p-6 rounded-lg border border-white/20">
-                <h3 className="text-xl font-semibold mb-4 text-primary">HackBuddy AI Agent: Hackathon Team Matching System</h3>
+            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+              <div className="glass-card p-6 rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto animate-scale-in">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-bold text-primary">AI Agent Interview Prompt</h3>
+                  <button 
+                    onClick={() => setShowPrompt(false)}
+                    className="rounded-full p-2 hover:bg-white/10 transition-colors"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
                 
-                <div className="text-white/90 leading-relaxed">
-                  <p className="mb-4"><strong className="text-white">Project Overview:</strong> HackBuddy is an AI-powered matching platform designed to solve one of the most significant challenges in hackathons: finding the ideal team. This innovative solution uses advanced AI to connect participants based on complementary skills, experience levels, and project interests.</p>
+                <div className="space-y-4">
+                  <p className="text-foreground/90">
+                    Our AI agent will ask you a series of questions focused on the following areas:
+                  </p>
                   
-                  <p className="mb-4"><strong className="text-white">Target Competition:</strong> GenAI Genesis Hackathon in the "Beginner AI" and "Best AI-Powered Tool for Hackathon" categories, focusing on human empowerment through technology.</p>
+                  <div className="space-y-3">
+                    <div className="glass-card p-3 rounded-lg border border-white/10">
+                      <h4 className="font-medium mb-1">Technical Skills Assessment</h4>
+                      <p className="text-sm text-foreground/70">
+                        • Proficiency levels in programming languages, frameworks, and tools
+                        <br />
+                        • Areas of technical specialization and experience
+                        <br />
+                        • Technical background and education
+                      </p>
+                    </div>
+                    
+                    <div className="glass-card p-3 rounded-lg border border-white/10">
+                      <h4 className="font-medium mb-1">Project Experience</h4>
+                      <p className="text-sm text-foreground/70">
+                        • Previous hackathon or project experience
+                        <br />
+                        • Examples of challenges you've overcome
+                        <br />
+                        • Your role in team projects
+                      </p>
+                    </div>
+                    
+                    <div className="glass-card p-3 rounded-lg border border-white/10">
+                      <h4 className="font-medium mb-1">Team Preferences</h4>
+                      <p className="text-sm text-foreground/70">
+                        • Working style and communication preferences
+                        <br />
+                        • Skills you're looking for in teammates
+                        <br />
+                        • Project domains you're most interested in
+                      </p>
+                    </div>
+                    
+                    <div className="glass-card p-3 rounded-lg border border-white/10">
+                      <h4 className="font-medium mb-1">Availability & Commitment</h4>
+                      <p className="text-sm text-foreground/70">
+                        • Time availability for hackathon preparation and participation
+                        <br />
+                        • Preferred hackathon formats (in-person, virtual, hybrid)
+                        <br />
+                        • Commitment level for upcoming events
+                      </p>
+                    </div>
+                  </div>
                   
-                  <p className="mb-4"><strong className="text-white">Core Problem:</strong> Many hackathon participants struggle to find teammates whose skills complement their own, leading to suboptimal team formation and project outcomes. This issue is especially challenging for first-time hackers.</p>
-                  
-                  <p className="mb-4"><strong className="text-white">Solution:</strong> HackBuddy employs a conversational AI agent that conducts personalized interviews with participants to gather detailed information about their technical skills, previous projects, interests, and team preferences. This data is then used to create optimal team matches.</p>
-                  
-                  <p className="mb-4"><strong className="text-white">Key Features:</strong></p>
-                  <ul className="list-disc pl-6 mb-4 space-y-2">
-                    <li>AI-powered interview system that learns about participants through natural conversation</li>
-                    <li>Skill-based matching algorithm that creates balanced, complementary teams</li>
-                    <li>B2B integration for hackathon organizers to streamline participant registration and team formation</li>
-                    <li>B2C functionality allowing individuals to find ideal teammates across various hackathon events</li>
-                  </ul>
-                  
-                  <p className="mb-4"><strong className="text-white">Technical Implementation:</strong> The platform integrates with the Vapi API for voice-based AI interaction, with a database system that securely stores participant profiles and facilitates optimal matching.</p>
-                  
-                  <p className="mb-4"><strong className="text-white">Market Validation:</strong> Similar models have proven successful in professional networking contexts (e.g., Boardy for LinkedIn), demonstrating the viability and demand for AI-powered connection services.</p>
+                  <p className="text-foreground/90 mt-4">
+                    Based on your responses, our matching algorithm will create a detailed profile
+                    that helps us connect you with compatible teammates who complement your skills
+                    and share your interests.
+                  </p>
+                </div>
+                
+                <div className="mt-6 flex justify-end">
+                  <Link to="/schedule-call">
+                    <Button 
+                      size="sm"
+                      className="flex items-center gap-2 mr-3"
+                    >
+                      Schedule a Call
+                    </Button>
+                  </Link>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setShowPrompt(false)}
+                  >
+                    Close
+                  </Button>
                 </div>
               </div>
             </div>
